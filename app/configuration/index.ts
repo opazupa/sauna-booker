@@ -15,6 +15,7 @@ export interface IConfiguration {
   booking: {
     userName: string;
     password: string;
+    timezone: string;
   };
   sentry: {
     dsn: string;
@@ -35,6 +36,7 @@ const {
   CHROME_EXEC_PATH,
   BOOKING_USERNAME,
   BOOKING_PASSWORD,
+  BOOKING_TIMEZONE,
 } = process.env;
 
 /**
@@ -50,6 +52,7 @@ export const Configuration: IConfiguration = {
   booking: {
     userName: BOOKING_USERNAME,
     password: BOOKING_PASSWORD,
+    timezone: BOOKING_TIMEZONE,
   },
   sentry: {
     dsn: SENTRY_DSN,

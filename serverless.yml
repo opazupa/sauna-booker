@@ -12,6 +12,8 @@ provider:
   stackTags:
     Owner: Olli Saarinen
     Project: sauna-booker-${opt:stage}
+  environment:
+
 
 package:
   exclude:
@@ -19,7 +21,7 @@ package:
 
 functions:
   book-sauna:
-    handler: app/handler.bookNext
+    handler: app/handler.bookSauna
     timeout: 500
     # Extending Lambda layer
     layers:

@@ -13,6 +13,7 @@ const PAGE = {
   NEW_BOOKING_BUTTON: '.addbooking',
   ACCEPT_COOKIES_BUTTON: 'button[data-allowall]',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
+  MY_BOOKED_SLOT: 'div.slot[data-bookedby=self]',
   NEXT_WEEK_BUTTON: '.next.browse',
   SELECTED_DATE: '.activedate',
 };

@@ -1,21 +1,24 @@
 import { Handler } from 'aws-lambda';
-import { DateTime } from 'luxon';
 
 import { Configuration } from './configuration';
 import { bookSaunaSlot } from './services/booking';
-import { setup, wrapHandler } from './utils';
+import { getBookingZoneTime, isMidnight, setup, wrapHandler } from './utils';
 
 /**
- * Book next time for sauna
+ * Book sauna by the configuration
  */
-export const bookNext: Handler = wrapHandler(async () => {
+export const bookSauna: Handler = wrapHandler(async () => {
+  // Return if the trigger is not on the midnight
+  if (!isMidnight()) {
+    console.log(`No midnight, no trigger. The time in booking timezone is ${getBookingZoneTime().toString()} :/`);
+    return;
+  }
   const { browser, page } = await setup(Configuration);
-  console.log(DateTime.now().toString());
+
   try {
     await bookSaunaSlot(page);
     browser.close();
   } catch (err) {
-    console.error(err);
     browser.close();
     throw err;
   }
