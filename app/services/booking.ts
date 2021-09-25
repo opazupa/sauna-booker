@@ -85,7 +85,7 @@ export const bookSaunaSlot = async (page: Page) => {
   const status = `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
     'vapaa',
     '',
-  )} on ${getBookingZoneTime().toFormat(`ccc d'.' LLLL`)}. 👌👌`;
+  )} on ${getBookingZoneTime().plus({ weeks: 4 }).toFormat(`ccc d'.' LLLL`)}. 👌👌`;
   console.log(status);
 
   // Wait until request is done
