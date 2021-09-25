@@ -16,7 +16,8 @@ export const bookSauna: Handler = wrapHandler(async () => {
   const { browser, page } = await setup(Configuration);
 
   try {
-    await bookSaunaSlot(page);
+    const booking = await bookSaunaSlot(page);
+    console.log(booking);
     browser.close();
   } catch (err) {
     browser.close();

@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer-core';
 
 import { Configuration } from '../configuration';
-import { repeatClick, shortPause } from '../utils';
+import { getBookingZoneTime, repeatClick, shortPause } from '../utils';
 
 const HOME_URL = 'https://plus.yitgroup.com';
 
@@ -13,12 +13,30 @@ const PAGE = {
   NEW_BOOKING_BUTTON: '.addbooking',
   ACCEPT_COOKIES_BUTTON: 'button[data-allowall]',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
-  MY_BOOKED_SLOT: 'div.slot[data-bookedby=self]',
   NEXT_WEEK_BUTTON: '.next.browse',
   SELECTED_DATE: '.activedate',
 };
 
-export const bookSaunaSlot = async (page: Page) => {
+/**
+ * Sauna booking
+ *
+ * @interface SaunaBooking
+ */
+interface SaunaBooking {
+  title: string;
+  location: string;
+  starts: string;
+  ends: string;
+  timezone: string;
+}
+
+/**
+ * Book a sauna slot
+ *
+ * @param {Page} page
+ * @returns {Promise<SaunaBooking>}
+ */
+export const bookSaunaSlot = async (page: Page): Promise<SaunaBooking> => {
   // Go to booking site
   await page.goto(HOME_URL);
 
@@ -63,13 +81,33 @@ export const bookSaunaSlot = async (page: Page) => {
     return;
   }
 
-  const lastFreeSlot = freeSlots[freeSlots.length - 1];
-  const text = await page.evaluate((lastFreeSlot) => <string>lastFreeSlot.textContent, lastFreeSlot);
-  await lastFreeSlot.click();
+  const selectedSlot = freeSlots[freeSlots.length - 1];
+  const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
+  await selectedSlot.click();
 
   await page.click(PAGE.CONFIRM_BUTTON);
-  console.log(`Booked slot ${text.replace('vapaa', '')} on ${currentDate.split('(', 1)}`);
+  console.log(`Booked slot ${selectedSlotText.replace('vapaa', '')} on ${currentDate.split('(', 1)}`);
 
   // Wait until request is done
   await shortPause(page);
+
+  return createBookingInfo(selectedSlotText);
+};
+
+/**
+ * Create info about the booking
+ *
+ * @param {string} selectedSlot
+ * @returns {SaunaBooking}
+ */
+const createBookingInfo = (selectedSlot: string): SaunaBooking => {
+  const saunaDate = getBookingZoneTime().plus({ weeks: 4 }).set({ second: 0, minute: 0 });
+  const startHour = parseInt(selectedSlot.substring(0, 2));
+  return {
+    title: 'Saunavuoro',
+    location: 'Harjus kattosauna',
+    starts: saunaDate.set({ hour: startHour }).toString(),
+    ends: saunaDate.set({ hour: startHour + 1 }).toString(),
+    timezone: Configuration.booking.timezone,
+  } as SaunaBooking;
 };
