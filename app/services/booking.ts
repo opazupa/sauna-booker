@@ -59,9 +59,17 @@ export const bookSaunaSlot = async (page: Page) => {
   const currentDate = await page.$eval(PAGE.SELECTED_DATE, (el) => el.textContent);
   const freeSlots = await page.$$(PAGE.FREE_SLOT);
   console.log(`Found ${freeSlots.length} free slots ready to be booked`);
+
+  // Stop the process if not free slots are there
+  if (freeSlots.length === 0) {
+    console.log('No slots available :(');
+    return;
+  }
+
   const lastFreeSlot = freeSlots[freeSlots.length - 1];
   const text = await page.evaluate((lastFreeSlot) => <string>lastFreeSlot.textContent, lastFreeSlot);
   await lastFreeSlot.click();
+
   await page.click(PAGE.CONFIRM_BUTTON);
   console.log(`Booked slot ${text.replace('vapaa', '')} on ${currentDate.split('(', 1)}`);
 
