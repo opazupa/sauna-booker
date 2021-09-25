@@ -2,6 +2,7 @@ import { Handler } from 'aws-lambda';
 
 import { Configuration } from './configuration';
 import { bookSaunaSlot } from './services/booking';
+import { sendNotification } from './services/telegram';
 import { getBookingZoneTime, isMidnight, setup, wrapHandler } from './utils';
 
 /**
@@ -10,14 +11,14 @@ import { getBookingZoneTime, isMidnight, setup, wrapHandler } from './utils';
 export const bookSauna: Handler = wrapHandler(async () => {
   // Return if the trigger is not on the midnight
   if (!isMidnight()) {
-    console.log(`No midnight, no trigger. The time in booking timezone is ${getBookingZoneTime().toString()} :/`);
+    console.log(`No midnight, no trigger. The time in booking timezone is ${getBookingZoneTime().toString()} 🤔`);
     return;
   }
   const { browser, page } = await setup(Configuration);
 
   try {
-    const booking = await bookSaunaSlot(page);
-    console.log(booking);
+    const { status } = await bookSaunaSlot(page);
+    await sendNotification(status);
     browser.close();
   } catch (err) {
     browser.close();

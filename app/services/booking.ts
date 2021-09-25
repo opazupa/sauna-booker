@@ -34,9 +34,9 @@ interface SaunaBooking {
  * Book a sauna slot
  *
  * @param {Page} page
- * @returns {Promise<SaunaBooking>}
+ * @returns
  */
-export const bookSaunaSlot = async (page: Page): Promise<SaunaBooking> => {
+export const bookSaunaSlot = async (page: Page) => {
   // Go to booking site
   await page.goto(HOME_URL);
 
@@ -71,24 +71,26 @@ export const bookSaunaSlot = async (page: Page): Promise<SaunaBooking> => {
 
   // TODO add more custom logic
   // Now the func is run on midnight on fri & sun to book last slots to sauna.
-  const currentDate = await page.$eval(PAGE.SELECTED_DATE, (el) => el.textContent);
   const freeSlots = await page.$$(PAGE.FREE_SLOT);
   console.log(`Found ${freeSlots.length} free slots ready to be booked`);
 
   // Stop the process if not free slots are there
-  if (freeSlots.length === 0) throw Error('No slots available :(');
+  if (freeSlots.length === 0) throw Error('No slots available 😓');
 
   const selectedSlot = freeSlots[freeSlots.length - 1];
   const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
   await selectedSlot.click();
 
   await page.click(PAGE.CONFIRM_BUTTON);
-  console.log(`Booked slot ${selectedSlotText.replace('vapaa', '')} on ${currentDate.split('(', 1)}`);
+  const status = `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
+    'vapaa',
+    '',
+  )} on ${getBookingZoneTime().toFormat(`ccc d'.' LLLL`)}. 👌👌`;
+  console.log(status);
 
   // Wait until request is done
   await shortPause(page);
-
-  return createBookingInfo(selectedSlotText);
+  return { status, info: createBookingInfo(selectedSlotText) };
 };
 
 /**

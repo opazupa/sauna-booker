@@ -58,6 +58,8 @@ jobs:
           touch .env
           echo BOOKING_USERNAME=${{ secrets.BOOKING_USERNAME }} >> .env
           echo BOOKING_PASSWORD=${{ secrets.BOOKING_PASSWORD }} >> .env
+          echo TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }} >> .env
+          echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
           echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
           cat .env
 

@@ -21,6 +21,10 @@ export interface IConfiguration {
     dsn: string;
     env: string;
   };
+  telegram: {
+    chatId: string;
+    botToken: string;
+  };
   chromeExecPath?: string;
 }
 
@@ -37,6 +41,8 @@ const {
   BOOKING_USERNAME,
   BOOKING_PASSWORD,
   BOOKING_TIMEZONE,
+  TELEGRAM_CHAT_ID,
+  TELEGRAM_BOT_TOKEN,
 } = process.env;
 
 /**
@@ -57,6 +63,10 @@ export const Configuration: IConfiguration = {
   sentry: {
     dsn: SENTRY_DSN,
     env: SENTRY_ENV || NODE_ENV,
+  },
+  telegram: {
+    botToken: TELEGRAM_BOT_TOKEN,
+    chatId: TELEGRAM_CHAT_ID,
   },
   chromeExecPath: CHROME_EXEC_PATH,
 };
