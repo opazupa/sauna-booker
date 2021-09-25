@@ -1,0 +1,41 @@
+app: sauna-booker
+service: sauna-booker
+frameworkVersion: ^2.33.1
+disabledDeprecations:
+  - "*" # To disable all deprecation messages
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: ${opt:stage, 'dev'}
+  region: ${env:AWS_S3_REGION}
+  stackTags:
+    Owner: Olli Saarinen
+    Project: sauna-booker-${opt:stage}
+
+package:
+  exclude:
+    - .env.dev
+
+functions:
+  book-sauna:
+    handler: app/handler.bookNext
+    timeout: 500
+    # Extending Lambda layer
+    layers:
+        - arn:aws:lambda:${env:AWS_S3_REGION}:764866452798:layer:chrome-aws-lambda:22
+    events:
+      - schedule:
+          rate: rate(1 minute)
+          enabled: true
+
+
+custom:
+  # Local development
+  serverless-offline:
+    httpPort: 4000
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-dotenv-plugin
+  - serverless-offline

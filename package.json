@@ -1,0 +1,42 @@
+{
+  "name": "sauna-booker",
+  "description": "",
+  "version": "0.1.0",
+  "author": "Olli Saarinen",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/opazupa/sauna-booker"
+  },
+  "dependencies": {
+    "@sentry/serverless": "^6.2.5",
+    "aws-sdk": "^2.879.0",
+    "chrome-aws-lambda": "^10.1.0",
+    "dotenv": "^8.2.0",
+    "luxon": "^1.26.0",
+    "puppeteer-core": "^10.4.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.61",
+    "@types/luxon": "^1.26.3",
+    "@types/node": "^14.14.37",
+    "@types/puppeteer-core": "^5.4.0",
+    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/parser": "^4.20.0",
+    "eslint": "^7.23.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.4.1",
+    "serverless": "2.33.1",
+    "serverless-dotenv-plugin": "^3.9.0",
+    "serverless-offline": "^6.5.0",
+    "serverless-plugin-typescript": "^1.1.9",
+    "ts-node": "^9.1.1",
+    "typescript": "^3.9.7"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "local": "serverless offline --stage dev",
+    "invoke": "serverless invoke local --stage dev --function",
+    "build": "serverless package --stage prod"
+  }
+}
