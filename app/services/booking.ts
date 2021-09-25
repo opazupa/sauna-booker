@@ -76,10 +76,7 @@ export const bookSaunaSlot = async (page: Page): Promise<SaunaBooking> => {
   console.log(`Found ${freeSlots.length} free slots ready to be booked`);
 
   // Stop the process if not free slots are there
-  if (freeSlots.length === 0) {
-    console.log('No slots available :(');
-    return;
-  }
+  if (freeSlots.length === 0) throw Error('No slots available :(');
 
   const selectedSlot = freeSlots[freeSlots.length - 1];
   const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
