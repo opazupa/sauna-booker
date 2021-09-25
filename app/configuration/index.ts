@@ -7,32 +7,52 @@ const DEVELOPMENT = 'dev';
  *
  * @interface IConfiguration
  */
-interface IConfiguration {
+export interface IConfiguration {
   isDev: () => boolean;
   aws: {
     region: string;
+  };
+  booking: {
+    userName: string;
+    password: string;
   };
   sentry: {
     dsn: string;
     env: string;
   };
+  chromeExecPath?: string;
 }
 
 // Apply .env
 dotenv.config();
 
+const {
+  APP_ENV,
+  AWS_S3_REGION,
+  SENTRY_DSN,
+  SENTRY_ENV,
+  NODE_ENV,
+  CHROME_EXEC_PATH,
+  BOOKING_USERNAME,
+  BOOKING_PASSWORD,
+} = process.env;
 /**
  * Env configuration
  *
  * @interface IConfiguration
  */
 export const Configuration: IConfiguration = {
-  isDev: () => (process.env.APP_ENV as string) === DEVELOPMENT,
+  isDev: () => (APP_ENV as string) === DEVELOPMENT,
   aws: {
-    region: process.env.AWS_S3_REGION as string,
+    region: AWS_S3_REGION,
+  },
+  booking: {
+    userName: BOOKING_USERNAME,
+    password: BOOKING_PASSWORD,
   },
   sentry: {
-    dsn: process.env.SENTRY_DSN as string,
-    env: (process.env.SENTRY_ENV || process.env.NODE_ENV) as string,
+    dsn: SENTRY_DSN,
+    env: (SENTRY_ENV || NODE_ENV) as string,
   },
+  chromeExecPath: CHROME_EXEC_PATH,
 };
