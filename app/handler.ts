@@ -1,4 +1,5 @@
 import { Handler } from 'aws-lambda';
+import { DateTime } from 'luxon';
 
 import { Configuration } from './configuration';
 import { bookSaunaSlot } from './services/booking';
@@ -9,6 +10,7 @@ import { setup, wrapHandler } from './utils';
  */
 export const bookNext: Handler = wrapHandler(async () => {
   const { browser, page } = await setup(Configuration);
+  console.log(DateTime.now().toString());
   try {
     await bookSaunaSlot(page);
     browser.close();
