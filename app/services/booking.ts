@@ -47,11 +47,7 @@ export const bookSaunaSlot = async (page: Page) => {
   // Navigate to bookings
   await page.waitForSelector(PAGE.NEW_BOOKING_BUTTON, { visible: true }).then((button) => button.click());
 
-  // Now for testing let's use pyykkitupa
-  // TODO removed
-  await page.waitForSelector('select[name=calendar]').then((dropdown) => dropdown.select('2530'));
-
-  // Browse 4 weeks ahead (calendar is open)
+  // Browse 4 weeks ahead (calendar is bookable 4 weeks from nows)
   await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, 4);
 
   // TODO add more custom logic
