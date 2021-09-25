@@ -26,8 +26,8 @@ functions:
         - arn:aws:lambda:${env:AWS_S3_REGION}:764866452798:layer:chrome-aws-lambda:22
     events:
       - schedule:
-          rate: rate(1 hour)
-          enabled: false
+          rate: cron(1 10 ? * THU,SAT *)
+          enabled: true
 
 
 custom:

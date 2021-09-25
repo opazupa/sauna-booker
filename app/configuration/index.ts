@@ -36,13 +36,14 @@ const {
   BOOKING_USERNAME,
   BOOKING_PASSWORD,
 } = process.env;
+
 /**
  * Env configuration
  *
  * @interface IConfiguration
  */
 export const Configuration: IConfiguration = {
-  isDev: () => (APP_ENV as string) === DEVELOPMENT,
+  isDev: () => APP_ENV === DEVELOPMENT,
   aws: {
     region: AWS_S3_REGION,
   },
@@ -52,7 +53,7 @@ export const Configuration: IConfiguration = {
   },
   sentry: {
     dsn: SENTRY_DSN,
-    env: (SENTRY_ENV || NODE_ENV) as string,
+    env: SENTRY_ENV || NODE_ENV,
   },
   chromeExecPath: CHROME_EXEC_PATH,
 };

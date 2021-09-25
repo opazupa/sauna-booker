@@ -1,7 +1,7 @@
 import { Handler } from 'aws-lambda';
 
 import { Configuration } from './configuration';
-import { bookSlot } from './services/sauna';
+import { bookSaunaSlot } from './services/booking';
 import { setup, wrapHandler } from './utils';
 
 /**
@@ -10,9 +10,11 @@ import { setup, wrapHandler } from './utils';
 export const bookNext: Handler = wrapHandler(async () => {
   const { browser, page } = await setup(Configuration);
   try {
-    await bookSlot(page);
-  } catch {
+    await bookSaunaSlot(page);
     browser.close();
+  } catch (err) {
+    console.error(err);
+    browser.close();
+    throw err;
   }
-  browser.close();
 });
