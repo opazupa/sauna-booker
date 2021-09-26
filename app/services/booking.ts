@@ -1,8 +1,9 @@
 import { Page } from 'puppeteer-core';
 
 import { Configuration } from '../configuration';
-import { getBookingZoneTime, repeatClick, shortPause } from '../utils';
+import { getBookingSlotDate, repeatClick, shortPause } from '../utils';
 
+// Site home URL
 const HOME_URL = 'https://plus.yitgroup.com';
 
 /**
@@ -19,6 +20,7 @@ const PAGE = {
   MY_BOOKED_SLOT: 'div.slot[data-bookedby=self]',
   NEXT_WEEK_BUTTON: '.next.browse',
   SELECTED_DATE: '.activedate',
+  SELECT_DAY_BADGE: 'dayball',
 };
 
 /**
@@ -51,8 +53,6 @@ export const bookSaunaSlot = async (page: Page) => {
   await page.waitForSelector('select[name=calendar]').then((dropdown) => dropdown.select('2530'));
   const { status } = await bookFreeSlot(page);
 
-  // Wait until request is done
-  await shortPause(page);
   return status;
 };
 
@@ -63,7 +63,7 @@ export const bookSaunaSlot = async (page: Page) => {
  * @returns {SaunaBooking}
  */
 const createBookingInfo = (selectedSlot: string): SaunaBooking => {
-  const saunaDate = getBookingZoneTime().plus({ weeks: 4 }).set({ second: 0, minute: 0 });
+  const saunaDate = getBookingSlotDate().set({ second: 0, minute: 0 });
   const startHour = parseInt(selectedSlot.substring(0, 2));
   return {
     title: 'Saunavuoro',
@@ -74,15 +74,24 @@ const createBookingInfo = (selectedSlot: string): SaunaBooking => {
   } as SaunaBooking;
 };
 
-const bookFreeSlot = async (page: Page) => {
+/**
+ * Book a sauna slot based on configuration
+ *
+ * @param {Page} page
+ * @returns {Promise<{ status: string; info: SaunaBooking }>}
+ */
+const bookFreeSlot = async (page: Page): Promise<{ status: string; info: SaunaBooking }> => {
   // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
   await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, 4);
 
   // Log info on which date was selected by default
   const selectedDate = await page.$eval(PAGE.SELECTED_DATE, (el) => el.textContent);
-  console.log(`${selectedDate} is selected by default from the calendar.`);
+  console.log(`${selectedDate}is selected by default from the calendar.`);
 
-  // Reselect the day if needed
+  // Reselect the day if needed (4 weeks from now)
+  await page
+    .$x(`//div[contains(@class, ${PAGE.SELECT_DAY_BADGE})][text()="${getBookingSlotDate().day}"]`)
+    .then(async ([button]) => await button.click());
 
   // TODO add more custom logic
   // Now the func is run on midnight to book last slots to sauna.
@@ -94,20 +103,23 @@ const bookFreeSlot = async (page: Page) => {
 
   const selectedSlot = freeSlots[freeSlots.length - 1];
   const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
-  await selectedSlot.click();
+  await selectedSlot.click().then(() => console.log(`Clicked on ${selectedSlotText} slot tile.`));
 
-  await page.click(PAGE.CONFIRM_BUTTON);
+  await page
+    .waitForSelector(PAGE.CONFIRM_BUTTON, { visible: true })
+    .then((okButton) => okButton.click().then(() => console.log('Clicked on confirm booking.')));
   let status = `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
     'vapaa',
     '',
-  )} on ${getBookingZoneTime().plus({ weeks: 4 }).toFormat(`ccc d'.' LLLL`)}. 👌👌`;
-  console.log(status);
+  )} on ${getBookingSlotDate().toFormat(`ccc d'.' LLLL`)}. 👌👌`;
 
   // Check that there is a slot booked for us.
-  console.log('Verified that there');
+  console.log('Waiting to verify booking confirmation.');
   await page.waitForSelector(PAGE.MY_BOOKED_SLOT);
   const mySlots = await page.$$(PAGE.MY_BOOKED_SLOT);
+
   if (mySlots.length === 0) status = 'Failed to verify booking 😓';
+  console.log(status);
 
   return { status, info: createBookingInfo(selectedSlotText) };
 };
