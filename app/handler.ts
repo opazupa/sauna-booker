@@ -6,18 +6,25 @@ import { sendNotification } from './services/telegram';
 import { getBookingZoneTime, isMidnight, setup, wrapHandler } from './utils';
 
 /**
+ * Book sauna event parameters
+ */
+type BookSaunaParams = {
+  ignoreMidnight: boolean;
+};
+
+/**
  * Book sauna by the configuration
  */
-export const bookSauna: Handler = wrapHandler(async () => {
+export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event) => {
   // Return if the trigger is not on the midnight
-  if (!isMidnight()) {
+  if (!(event.ignoreMidnight || isMidnight())) {
     console.log(`No midnight, no trigger. The time in booking timezone is ${getBookingZoneTime().toString()} 🤔`);
     return;
   }
   const { browser, page } = await setup(Configuration);
 
   try {
-    const { status } = await bookSaunaSlot(page);
+    const status = await bookSaunaSlot(page);
     await sendNotification(status);
     browser.close();
   } catch (err) {

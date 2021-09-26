@@ -5,6 +5,9 @@ import { getBookingZoneTime, repeatClick, shortPause } from '../utils';
 
 const HOME_URL = 'https://plus.yitgroup.com';
 
+/**
+ * HTML DOM selectors for components
+ */
 const PAGE = {
   USER_INPUT: '#signInName',
   PASSWORD_INPUT: '#password',
@@ -13,6 +16,7 @@ const PAGE = {
   NEW_BOOKING_BUTTON: '.addbooking',
   ACCEPT_COOKIES_BUTTON: 'button[data-allowall]',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
+  MY_BOOKED_SLOT: 'div.slot[data-bookedby=self]',
   NEXT_WEEK_BUTTON: '.next.browse',
   SELECTED_DATE: '.activedate',
 };
@@ -37,60 +41,19 @@ interface SaunaBooking {
  * @returns
  */
 export const bookSaunaSlot = async (page: Page) => {
-  // Go to booking site
+  // Go to home site
   await page.goto(HOME_URL);
-
-  // After redirection submit login creds
-  await page.waitForSelector(PAGE.USER_INPUT);
-  await page.$eval(
-    PAGE.USER_INPUT,
-    (el, userName: string) => ((<HTMLInputElement>el).value = userName),
-    Configuration.booking.userName,
-  );
-  await page.$eval(
-    PAGE.PASSWORD_INPUT,
-    (el, password: string) => ((<HTMLInputElement>el).value = password),
-    Configuration.booking.password,
-  );
-  await page.click(PAGE.LOGIN_BUTTON);
-
-  // Accept cookies
-  await page
-    .waitForSelector(PAGE.ACCEPT_COOKIES_BUTTON, { visible: true })
-    .then((cookieButton) => cookieButton.click());
-
-  // Wait for page to render
+  await login(page);
+  // Wait for page to render after redirect
   await shortPause(page);
-  await page.goto(`${HOME_URL}/book-common-spaces`);
-
-  // Navigate to bookings
-  await page.waitForSelector(PAGE.NEW_BOOKING_BUTTON, { visible: true }).then((button) => button.click());
-
-  // Browse 4 weeks ahead (calendar is bookable 4 weeks from nows)
-  await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, 4);
-
-  // TODO add more custom logic
-  // Now the func is run on midnight on fri & sun to book last slots to sauna.
-  const freeSlots = await page.$$(PAGE.FREE_SLOT);
-  console.log(`Found ${freeSlots.length} free slots ready to be booked`);
-
-  // Stop the process if not free slots are there
-  if (freeSlots.length === 0) throw Error('No slots available 😓');
-
-  const selectedSlot = freeSlots[freeSlots.length - 1];
-  const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
-  await selectedSlot.click();
-
-  await page.click(PAGE.CONFIRM_BUTTON);
-  const status = `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
-    'vapaa',
-    '',
-  )} on ${getBookingZoneTime().plus({ weeks: 4 }).toFormat(`ccc d'.' LLLL`)}. 👌👌`;
-  console.log(status);
+  await navigateToBookings(page);
+  // TODO remove after testing
+  await page.waitForSelector('select[name=calendar]').then((dropdown) => dropdown.select('2530'));
+  const { status } = await bookFreeSlot(page);
 
   // Wait until request is done
   await shortPause(page);
-  return { status, info: createBookingInfo(selectedSlotText) };
+  return status;
 };
 
 /**
@@ -109,4 +72,82 @@ const createBookingInfo = (selectedSlot: string): SaunaBooking => {
     ends: saunaDate.set({ hour: startHour + 1 }).toString(),
     timezone: Configuration.booking.timezone,
   } as SaunaBooking;
+};
+
+const bookFreeSlot = async (page: Page) => {
+  // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
+  await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, 4);
+
+  // Log info on which date was selected by default
+  const selectedDate = await page.$eval(PAGE.SELECTED_DATE, (el) => el.textContent);
+  console.log(`${selectedDate} is selected by default from the calendar.`);
+
+  // Reselect the day if needed
+
+  // TODO add more custom logic
+  // Now the func is run on midnight to book last slots to sauna.
+  const freeSlots = await page.$$(PAGE.FREE_SLOT);
+  console.log(`Found ${freeSlots.length} free slots ready to be booked`);
+
+  // Stop the process if not free slots are there
+  if (freeSlots.length === 0) throw Error('No slots available 😓');
+
+  const selectedSlot = freeSlots[freeSlots.length - 1];
+  const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
+  await selectedSlot.click();
+
+  await page.click(PAGE.CONFIRM_BUTTON);
+  let status = `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
+    'vapaa',
+    '',
+  )} on ${getBookingZoneTime().plus({ weeks: 4 }).toFormat(`ccc d'.' LLLL`)}. 👌👌`;
+  console.log(status);
+
+  // Check that there is a slot booked for us.
+  console.log('Verified that there');
+  await page.waitForSelector(PAGE.MY_BOOKED_SLOT);
+  const mySlots = await page.$$(PAGE.MY_BOOKED_SLOT);
+  if (mySlots.length === 0) status = 'Failed to verify booking 😓';
+
+  return { status, info: createBookingInfo(selectedSlotText) };
+};
+
+/**
+ * Handle login to site
+ *
+ * @param {Page} page
+ */
+const login = async (page: Page) => {
+  // After redirection submit login creds
+  await page.waitForSelector(PAGE.USER_INPUT);
+  await page.$eval(
+    PAGE.USER_INPUT,
+    (el, userName: string) => ((<HTMLInputElement>el).value = userName),
+    Configuration.booking.userName,
+  );
+  await page.$eval(
+    PAGE.PASSWORD_INPUT,
+    (el, password: string) => ((<HTMLInputElement>el).value = password),
+    Configuration.booking.password,
+  );
+  await page.click(PAGE.LOGIN_BUTTON);
+};
+
+/**
+ * Navigate to booking tab
+ *
+ * @param {Page} page
+ */
+const navigateToBookings = async (page: Page) => {
+  // Accept cookies
+  await page
+    .waitForSelector(PAGE.ACCEPT_COOKIES_BUTTON, { visible: true })
+    .then((cookieButton) => cookieButton.click());
+
+  // Wait for page to render
+  await shortPause(page);
+  await page.goto(`${HOME_URL}/book-common-spaces`);
+
+  // Navigate to bookings
+  await page.waitForSelector(PAGE.NEW_BOOKING_BUTTON, { visible: true }).then((button) => button.click());
 };

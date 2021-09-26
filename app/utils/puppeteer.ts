@@ -13,6 +13,7 @@ export const setup = async (config: IConfiguration) => {
     slowMo: config.isDev() ? 250 : null,
   });
   const page = await browser.newPage();
+  page.setDefaultNavigationTimeout(60000);
   return { browser, page };
 };
 
