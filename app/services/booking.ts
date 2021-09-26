@@ -90,8 +90,15 @@ const bookFreeSlot = async (page: Page): Promise<{ status: string; info: SaunaBo
 
   // Reselect the day if needed (4 weeks from now)
   await page
-    .$x(`//div[contains(@class, ${PAGE.SELECT_DAY_BADGE})][text()="${getBookingSlotDate().day}"]`)
-    .then(async ([button]) => await button.click());
+    .$x(`//div[contains(@class, ${PAGE.SELECT_DAY_BADGE})][text()="${getBookingSlotDate().day + 1}"]`)
+    .then(async ([button]) => {
+      if (button) await button.click();
+      // It's monday, and the date is actually on the next week. Select monday as well.
+      else {
+        await page.click(PAGE.NEXT_WEEK_BUTTON).then(() => console.log(`It's monday, moved tp next week.`));
+        await page.$$(`.${PAGE.SELECT_DAY_BADGE}`).then(async (badges) => await badges[0].click());
+      }
+    });
 
   // TODO add more custom logic
   // Now the func is run on midnight to book last slots to sauna.
