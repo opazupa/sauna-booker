@@ -25,7 +25,7 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event) => 
   }
 
   // Check if the day is configured
-  if (!hasSaunaPreference) {
+  if (!hasSaunaPreference()) {
     console.log(`No sauna preferences configured for ${today.weekdayShort}`);
     return;
   }
