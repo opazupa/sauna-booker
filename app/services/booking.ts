@@ -44,7 +44,7 @@ export const bookSaunaSlot = async (page: Page) => {
 };
 
 /**
- * Book a sauna slot based on configuration
+ * Book sauna slot(s) based on configuration
  *
  * @param {Page} page
  * @returns {Promise<string[]>}
@@ -89,11 +89,11 @@ const bookFreeSlots = async (page: Page): Promise<string[]> => {
 };
 
 /**
- *
+ * Book next slot by preferences
  *
  * @param {Page} page
  * @param {SaunaDay} preference
- * @param {number} [bookingCount=1]
+ * @param {boolean} [double=false]
  * @returns {Promise<string>}
  */
 const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): Promise<string> => {
