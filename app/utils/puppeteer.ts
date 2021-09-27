@@ -5,7 +5,7 @@ import puppeteer, { Browser, Page } from 'puppeteer-core';
 import { IConfiguration } from '../configuration';
 
 /**
- * Setup puppeteer broser and page
+ * Setup puppeteer browser and page
  *
  * @param {IConfiguration} config
  * @returns {Promise<{ browser: Browser; page: Page }>}

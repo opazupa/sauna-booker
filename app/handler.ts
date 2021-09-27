@@ -3,7 +3,7 @@ import { Handler } from 'aws-lambda';
 import { Configuration } from './configuration';
 import { bookSaunaSlot } from './services/booking';
 import { sendNotification } from './services/telegram';
-import { getBookingZoneTime, isMidnight, setup, wrapHandler } from './utils';
+import { getBookingZoneTime, hasSaunaPreference, isMidnight, setup, wrapHandler } from './utils';
 
 /**
  * Book sauna event parameters
@@ -16,11 +16,20 @@ type BookSaunaParams = {
  * Book sauna by the configuration
  */
 export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event) => {
+  const today = getBookingZoneTime();
+
   // Return if the trigger is not on the midnight
   if (!(event.ignoreMidnight || isMidnight())) {
-    console.log(`No midnight, no trigger. The time in booking timezone is ${getBookingZoneTime().toString()} 🤔`);
+    console.log(`No midnight, no trigger. The time in booking timezone is ${today.toString()} 🤔`);
     return;
   }
+
+  // Check if the day is configured
+  if (!hasSaunaPreference) {
+    console.log(`No sauna preferences configured for ${today.weekdayShort}`);
+    return;
+  }
+
   const { browser, page } = await setup(Configuration);
 
   try {

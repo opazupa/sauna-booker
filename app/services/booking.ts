@@ -1,7 +1,7 @@
-import { Page } from 'puppeteer-core';
+import { ElementHandle, Page } from 'puppeteer-core';
 
 import { Configuration } from '../configuration';
-import { BOOKING_WEEKS_AHEAD, getBookingSlotDate, repeatClick, shortPause } from '../utils';
+import { BOOKING_WEEKS_AHEAD, getBookingSlotDate, hasSaunaPreference, repeatClick, shortPause } from '../utils';
 
 // Site home URL
 const HOME_URL = 'https://plus.yitgroup.com';
@@ -114,7 +114,7 @@ const bookFreeSlot = async (page: Page): Promise<{ status: string; info: SaunaBo
   // Stop the process if not free slots are there
   if (freeSlots.length === 0) throw Error('No slots available 😓');
 
-  const selectedSlot = freeSlots[freeSlots.length - 1];
+  const selectedSlot = selectPreferredSaunaSlot(freeSlots);
   const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
   await selectedSlot.click({}).then(() => console.log(`Clicked on ${selectedSlotText} slot tile.`));
 
@@ -175,4 +175,24 @@ const navigateToBookings = async (page: Page) => {
 
   // Navigate to bookings
   await page.waitForSelector(PAGE.NEW_BOOKING_BUTTON, { visible: true }).then((button) => button.click());
+};
+
+/**
+ * Select free sauna slot from available ones based on preference
+ *
+ * @param {ElementHandle<Element>[]} slots
+ * @returns {ElementHandle<Element>}
+ */
+const selectPreferredSaunaSlot = (slots: ElementHandle<Element>[]): ElementHandle<Element> => {
+  const saunaDay = hasSaunaPreference();
+  switch (saunaDay.time) {
+    case 'FIRST':
+      return slots[0];
+    case 'MIDDLE':
+      return slots[Math.round((slots.length - 1) / 2)];
+    case 'LAST':
+      return slots[slots.length - 1];
+    default:
+      throw Error(`Unknown sauna day preference: ${saunaDay.time}`);
+  }
 };

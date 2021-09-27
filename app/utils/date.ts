@@ -1,10 +1,25 @@
 import { DateTime } from 'luxon';
 
-import { Configuration } from '../configuration';
+import { Configuration, SaunaDay } from '../configuration';
 
-const { timezone } = Configuration.booking;
+const { timezone, saunaDayPreferences } = Configuration.booking;
 
 export const BOOKING_WEEKS_AHEAD = 4;
+const WEEKLY_BOOKING_LIMIT = 2;
+
+/**
+ * Check if sauna preference is configured for today
+ *
+ * @returns
+ */
+export const hasSaunaPreference = (): SaunaDay | null => {
+  // Validate sauna configuration for debugging
+  const dayConfigKeys = Object.keys(saunaDayPreferences);
+  if (dayConfigKeys.length > WEEKLY_BOOKING_LIMIT) {
+    console.warn(`Weekly booking limit ${WEEKLY_BOOKING_LIMIT} exceeded with ${dayConfigKeys.join(',')} enabled.`);
+  }
+  return saunaDayPreferences[getBookingZoneTime().weekdayShort];
+};
 
 /**
  * Get time in the configured booking time zone

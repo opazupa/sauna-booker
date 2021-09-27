@@ -2,6 +2,52 @@ import * as dotenv from 'dotenv';
 
 const DEVELOPMENT = 'dev';
 
+// Weekday
+export type Weekday = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+// Sauna time preference
+export type TimePreference = 'FIRST' | 'MIDDLE' | 'LAST';
+
+/**
+ * Sauna day
+ */
+export type SaunaDay = {
+  time: TimePreference;
+};
+/**
+ * Sauna preferences
+ */
+export type SaunaPreferences = {
+  [key in Weekday]?: SaunaDay;
+};
+
+/**
+ * Default sauna preferences
+ */
+export const DefaultSaunaPreferences: SaunaPreferences = {
+  // Only two should be enabled due sauna booking limit per week 2
+  Mon: {
+    time: 'MIDDLE',
+  },
+  Tue: {
+    time: 'LAST',
+  },
+  Wed: {
+    time: 'LAST',
+  },
+  Thu: {
+    time: 'FIRST',
+  },
+  Fri: {
+    time: 'LAST',
+  },
+  Sat: {
+    time: 'MIDDLE',
+  },
+  Sun: {
+    time: 'MIDDLE',
+  },
+};
+
 /**
  * Env configuration interface
  *
@@ -16,6 +62,7 @@ export interface IConfiguration {
     userName: string;
     password: string;
     timezone: string;
+    saunaDayPreferences: SaunaPreferences;
   };
   sentry: {
     dsn: string;
@@ -59,6 +106,7 @@ export const Configuration: IConfiguration = {
     userName: BOOKING_USERNAME,
     password: BOOKING_PASSWORD,
     timezone: BOOKING_TIMEZONE,
+    saunaDayPreferences: DefaultSaunaPreferences,
   },
   sentry: {
     dsn: SENTRY_DSN,
