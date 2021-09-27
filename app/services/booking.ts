@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer-core';
 
 import { Configuration } from '../configuration';
-import { getBookingSlotDate, repeatClick, shortPause } from '../utils';
+import { BOOKING_WEEKS_AHEAD, getBookingSlotDate, repeatClick, shortPause } from '../utils';
 
 // Site home URL
 const HOME_URL = 'https://plus.yitgroup.com';
@@ -16,6 +16,7 @@ const PAGE = {
   CONFIRM_BUTTON: '.ok',
   NEW_BOOKING_BUTTON: '.addbooking',
   ACCEPT_COOKIES_BUTTON: 'button[data-allowall]',
+  SLOT: 'div.slot',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
   MY_BOOKED_SLOT: 'div.slot[data-bookedby=self]',
   NEXT_WEEK_BUTTON: '.next.browse',
@@ -82,32 +83,32 @@ const createBookingInfo = (selectedSlot: string): SaunaBooking => {
  */
 const bookFreeSlot = async (page: Page): Promise<{ status: string; info: SaunaBooking }> => {
   // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
-  await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, 4);
+  const bookingDay = getBookingSlotDate().day;
+  await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, BOOKING_WEEKS_AHEAD);
 
   // Reselect the day and handle sunday/monday
-  await page
-    .$x(`//div[contains(@class, ${PAGE.SELECT_DAY_BADGE})][text()="${getBookingSlotDate().day}"]`)
-    .then(async ([button]) => {
+  await page.$x(`//div[contains(@class, ${PAGE.SELECT_DAY_BADGE})][text()="${bookingDay}"]`).then(async ([button]) => {
+    await page
+      .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
+      // Log info on which date was selected by default
+      .then((text) => console.log(`${text}is selected by default from the calendar.`));
+
+    if (button) await button.click().then(() => console.log(`Reclicked the button for day ${bookingDay}`));
+    // It's monday, and the date is actually on the next week. Select monday as well.
+    else {
+      await page.click(PAGE.NEXT_WEEK_BUTTON).then(() => console.log(`It's monday, moved to next week instead.`));
+      await page.$$(`.${PAGE.SELECT_DAY_BADGE}`).then(async ([monday]) => await monday.click());
       await page
         .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
-        // Log info on which date was selected by default
-        .then((text) => console.log(`${text}is selected by default from the calendar.`));
-
-      if (button)
-        await button.click().then(() => console.log(`Reclicked the button for day ${getBookingSlotDate().day}`));
-      // It's monday, and the date is actually on the next week. Select monday as well.
-      else {
-        await page.click(PAGE.NEXT_WEEK_BUTTON).then(() => console.log(`It's monday, moved to next week instead.`));
-        await page.$$(`.${PAGE.SELECT_DAY_BADGE}`).then(async ([monday]) => await monday.click());
-        await page
-          .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
-          .then((text) => console.log(`${text}is selected now from the calendar.`));
-      }
-    });
+        .then((text) => console.log(`${text}is selected now from the calendar.`));
+    }
+  });
 
   // TODO add more custom logic
   // Now the func is run on midnight to book last slots to sauna.
-  const freeSlots = await page.$$(PAGE.FREE_SLOT);
+  const freeSlots = await page
+    .waitForSelector(PAGE.SLOT, { visible: true })
+    .then(async () => await page.$$(PAGE.FREE_SLOT));
   console.log(`Found ${freeSlots.length} free slots ready to be booked`);
 
   // Stop the process if not free slots are there
@@ -115,7 +116,7 @@ const bookFreeSlot = async (page: Page): Promise<{ status: string; info: SaunaBo
 
   const selectedSlot = freeSlots[freeSlots.length - 1];
   const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
-  await selectedSlot.click().then(() => console.log(`Clicked on ${selectedSlotText} slot tile.`));
+  await selectedSlot.click({}).then(() => console.log(`Clicked on ${selectedSlotText} slot tile.`));
 
   await page
     .waitForSelector(PAGE.CONFIRM_BUTTON, { visible: true })

@@ -4,6 +4,8 @@ import { Configuration } from '../configuration';
 
 const { timezone } = Configuration.booking;
 
+export const BOOKING_WEEKS_AHEAD = 4;
+
 /**
  * Get time in the configured booking time zone
  *
@@ -23,7 +25,7 @@ export const getBookingZoneTime = (): DateTime => {
 export const getBookingSlotDate = (): DateTime => {
   return DateTime.fromObject({
     zone: timezone,
-  }).plus({ weeks: 4 });
+  }).plus({ weeks: BOOKING_WEEKS_AHEAD });
 };
 
 /**
