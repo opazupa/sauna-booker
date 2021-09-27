@@ -14,9 +14,10 @@ const WEEKLY_BOOKING_LIMIT = 2;
  */
 export const hasSaunaPreference = (): SaunaDay | null => {
   // Validate sauna configuration for debugging
-  const dayConfigKeys = Object.keys(saunaDayPreferences);
-  if (dayConfigKeys.length > WEEKLY_BOOKING_LIMIT) {
-    console.warn(`Weekly booking limit ${WEEKLY_BOOKING_LIMIT} exceeded with ${dayConfigKeys.join(',')} enabled.`);
+  const configuredBookingCount = Object.values(saunaDayPreferences).reduce((a, b) => (b.double ? a + 2 : ++a), 0);
+  console.log(configuredBookingCount);
+  if (configuredBookingCount > WEEKLY_BOOKING_LIMIT) {
+    console.warn(`Weekly booking limit ${WEEKLY_BOOKING_LIMIT} exceeded with ${configuredBookingCount}.`);
   }
   return saunaDayPreferences[getBookingZoneTime().weekdayShort];
 };

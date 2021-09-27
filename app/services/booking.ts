@@ -35,8 +35,6 @@ export const bookSaunaSlot = async (page: Page) => {
   // Go to home site
   await page.goto(HOME_URL);
   await login(page);
-  // Wait for page to render after redirect
-  await shortPause(page);
   await navigateToBookings(page);
   // TODO remove after testing
   await page.waitForSelector('select[name=calendar]').then((dropdown) => dropdown.select('2530'));
@@ -50,9 +48,11 @@ export const bookSaunaSlot = async (page: Page) => {
  * @returns {Promise<string[]>}
  */
 const bookFreeSlots = async (page: Page): Promise<string[]> => {
-  // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
   const bookingDay = getBookingSlotDate().day;
   const saunaDayPreference = hasSaunaPreference();
+  console.log(`Found sauna preferennces for the day: ${JSON.stringify(saunaDayPreference)}`);
+
+  // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
   await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, BOOKING_WEEKS_AHEAD);
 
   // Reselect the day and handle sunday/monday
@@ -150,6 +150,8 @@ const login = async (page: Page) => {
   );
   await page.click(PAGE.LOGIN_BUTTON);
   console.log('Login successful.');
+  // Wait for page to render after login redirect
+  await shortPause(page);
 };
 
 /**
