@@ -11,7 +11,10 @@ export type TimePreference = 'FIRST' | 'MIDDLE' | 'LAST';
  * Sauna day
  */
 export type SaunaDay = {
+  // Time of day
   time: TimePreference;
+  // Two bookings on same day
+  double?: boolean;
 };
 /**
  * Sauna preferences
@@ -26,7 +29,8 @@ export type SaunaPreferences = {
 export const DefaultSaunaPreferences: SaunaPreferences = {
   // Only two should be enabled due sauna booking limit per week 2
   Mon: {
-    time: 'MIDDLE',
+    time: 'FIRST',
+    double: true,
   },
   Tue: {
     time: 'LAST',

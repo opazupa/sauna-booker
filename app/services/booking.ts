@@ -1,10 +1,11 @@
 import { ElementHandle, Page } from 'puppeteer-core';
 
-import { Configuration } from '../configuration';
+import { Configuration, SaunaDay } from '../configuration';
 import { BOOKING_WEEKS_AHEAD, getBookingSlotDate, hasSaunaPreference, repeatClick, shortPause } from '../utils';
 
 // Site home URL
 const HOME_URL = 'https://plus.yitgroup.com';
+const DOUBLE_BOOK = true;
 
 /**
  * HTML DOM selectors for components
@@ -18,24 +19,11 @@ const PAGE = {
   ACCEPT_COOKIES_BUTTON: 'button[data-allowall]',
   SLOT: 'div.slot',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
-  MY_BOOKED_SLOT: 'div.slot[data-bookedby=self]',
+  MY_BOOKED_SLOT_XP: '//div[contains(@class, "slot")][@data-bookedby="self"]',
   NEXT_WEEK_BUTTON: '.next.browse',
   SELECTED_DATE: '.activedate',
   SELECT_DAY_BADGE: 'dayball',
 };
-
-/**
- * Sauna booking
- *
- * @interface SaunaBooking
- */
-interface SaunaBooking {
-  title: string;
-  location: string;
-  starts: string;
-  ends: string;
-  timezone: string;
-}
 
 /**
  * Book a sauna slot
@@ -52,38 +40,19 @@ export const bookSaunaSlot = async (page: Page) => {
   await navigateToBookings(page);
   // TODO remove after testing
   await page.waitForSelector('select[name=calendar]').then((dropdown) => dropdown.select('2530'));
-  const { status } = await bookFreeSlot(page);
-
-  return status;
-};
-
-/**
- * Create info about the booking
- *
- * @param {string} selectedSlot
- * @returns {SaunaBooking}
- */
-const createBookingInfo = (selectedSlot: string): SaunaBooking => {
-  const saunaDate = getBookingSlotDate().set({ second: 0, minute: 0 });
-  const startHour = parseInt(selectedSlot.substring(0, 2));
-  return {
-    title: 'Saunavuoro',
-    location: 'Harjus kattosauna',
-    starts: saunaDate.set({ hour: startHour }).toString(),
-    ends: saunaDate.set({ hour: startHour + 1 }).toString(),
-    timezone: Configuration.booking.timezone,
-  } as SaunaBooking;
+  return await bookFreeSlots(page);
 };
 
 /**
  * Book a sauna slot based on configuration
  *
  * @param {Page} page
- * @returns {Promise<{ status: string; info: SaunaBooking }>}
+ * @returns {Promise<string[]>}
  */
-const bookFreeSlot = async (page: Page): Promise<{ status: string; info: SaunaBooking }> => {
+const bookFreeSlots = async (page: Page): Promise<string[]> => {
   // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
   const bookingDay = getBookingSlotDate().day;
+  const saunaDayPreference = hasSaunaPreference();
   await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, BOOKING_WEEKS_AHEAD);
 
   // Reselect the day and handle sunday/monday
@@ -103,38 +72,62 @@ const bookFreeSlot = async (page: Page): Promise<{ status: string; info: SaunaBo
         .then((text) => console.log(`${text}is selected now from the calendar.`));
     }
   });
+  const statuses = [];
+  statuses.push(await bookNextSlot(page, saunaDayPreference));
+  if (saunaDayPreference.double) {
+    console.log('Double preference selected for the day. Continueing to second booking');
+    await bookNextSlot(page, saunaDayPreference, DOUBLE_BOOK)
+      .then((status) => statuses.push(status))
+      .catch((err) => {
+        // Don't rethrow err due we want to retun at least the one status
+        console.log('Something went wrong on the second booking :8!');
+        console.error(err);
+      });
+  }
 
-  // TODO add more custom logic
-  // Now the func is run on midnight to book last slots to sauna.
+  return statuses;
+};
+
+/**
+ *
+ *
+ * @param {Page} page
+ * @param {SaunaDay} preference
+ * @param {number} [bookingCount=1]
+ * @returns {Promise<string>}
+ */
+const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): Promise<string> => {
   const freeSlots = await page
     .waitForSelector(PAGE.SLOT, { visible: true })
     .then(async () => await page.$$(PAGE.FREE_SLOT));
   console.log(`Found ${freeSlots.length} free slots ready to be booked`);
 
   // Stop the process if not free slots are there
-  if (freeSlots.length === 0) throw Error('No slots available 😓');
+  if (freeSlots.length === 0) {
+    if (!double) throw Error('No slots available 😓');
+    else return `Failed to book double on ${getBookingSlotDate().toFormat(`ccc d'.' LLLL`)}`;
+  }
 
-  const selectedSlot = selectPreferredSaunaSlot(freeSlots);
+  const selectedSlot = selectPreferredSaunaSlot(freeSlots, preference);
   const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
   await selectedSlot.click({}).then(() => console.log(`Clicked on ${selectedSlotText} slot tile.`));
 
   await page
     .waitForSelector(PAGE.CONFIRM_BUTTON, { visible: true })
     .then((okButton) => okButton.click().then(() => console.log('Clicked on confirm booking.')));
-  let status = `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
+
+  // Check that there is a slot booked for us.
+  console.log(`Waiting to verify booking (${double ? 2 : 1}) confirmation.`);
+  // Force short break
+  const mySlotsConfirmed = await page.waitForXPath(`${PAGE.MY_BOOKED_SLOT_XP}[${double ? 2 : 1}]`);
+
+  if (mySlotsConfirmed) console.log(`Verify booking (${double ? 2 : 1}) confirmation.`);
+  else return 'Failed to verify the new booking 😓';
+
+  return `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
     'vapaa',
     '',
   )} on ${getBookingSlotDate().toFormat(`ccc d'.' LLLL`)}. 👌👌`;
-
-  // Check that there is a slot booked for us.
-  console.log('Waiting to verify booking confirmation.');
-  await page.waitForSelector(PAGE.MY_BOOKED_SLOT);
-  const mySlots = await page.$$(PAGE.MY_BOOKED_SLOT);
-
-  if (mySlots.length === 0) status = 'Failed to verify booking 😓';
-  console.log(status);
-
-  return { status, info: createBookingInfo(selectedSlotText) };
 };
 
 /**
@@ -156,6 +149,7 @@ const login = async (page: Page) => {
     Configuration.booking.password,
   );
   await page.click(PAGE.LOGIN_BUTTON);
+  console.log('Login successful.');
 };
 
 /**
@@ -171,10 +165,13 @@ const navigateToBookings = async (page: Page) => {
 
   // Wait for page to render
   await shortPause(page);
-  await page.goto(`${HOME_URL}/book-common-spaces`);
+  await page.goto(`${HOME_URL}/book-common-spaces`).then(() => console.log('Navigated to bookings'));
 
   // Navigate to bookings
-  await page.waitForSelector(PAGE.NEW_BOOKING_BUTTON, { visible: true }).then((button) => button.click());
+  await page
+    .waitForSelector(PAGE.NEW_BOOKING_BUTTON, { visible: true })
+    .then((button) => button.click())
+    .then(() => console.log('Booking calendar visible. Ready to start booking.'));
 };
 
 /**
@@ -183,9 +180,8 @@ const navigateToBookings = async (page: Page) => {
  * @param {ElementHandle<Element>[]} slots
  * @returns {ElementHandle<Element>}
  */
-const selectPreferredSaunaSlot = (slots: ElementHandle<Element>[]): ElementHandle<Element> => {
-  const saunaDay = hasSaunaPreference();
-  switch (saunaDay.time) {
+const selectPreferredSaunaSlot = (slots: ElementHandle<Element>[], preference: SaunaDay): ElementHandle<Element> => {
+  switch (preference.time) {
     case 'FIRST':
       return slots[0];
     case 'MIDDLE':
@@ -193,6 +189,6 @@ const selectPreferredSaunaSlot = (slots: ElementHandle<Element>[]): ElementHandl
     case 'LAST':
       return slots[slots.length - 1];
     default:
-      throw Error(`Unknown sauna day preference: ${saunaDay.time}`);
+      throw Error(`Unknown sauna day preference: ${preference.time}`);
   }
 };

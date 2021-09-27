@@ -33,8 +33,11 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event) => 
   const { browser, page } = await setup(Configuration);
 
   try {
-    const status = await bookSaunaSlot(page);
-    await sendNotification(status);
+    const statuses = await bookSaunaSlot(page);
+    for (const status of statuses) {
+      console.log(status);
+      await sendNotification(status);
+    }
     browser.close();
   } catch (err) {
     browser.close();
