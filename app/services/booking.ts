@@ -38,7 +38,6 @@ export const bookSaunaSlot = async (page: Page) => {
   await navigateToBookings(page);
   // TODO remove after testing
   await page.waitForSelector('select[name=calendar]').then((dropdown) => dropdown.select('2530'));
-  throw Error('TODO remove me :O');
   return await bookFreeSlots(page);
 };
 
