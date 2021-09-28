@@ -17,7 +17,7 @@ const PAGE = {
   CONFIRM_BUTTON: '.ok',
   NEW_BOOKING_BUTTON: '.addbooking',
   ACCEPT_COOKIES_BUTTON: 'button[data-allowall]',
-  SLOT: 'div.slot',
+  SLOTS_XP: '//div[@class = "slot"][2]',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
   MY_BOOKED_SLOT_XP: '//div[contains(@class, "slot")][@data-bookedby="self"]',
   NEXT_WEEK_BUTTON: '.next.browse',
@@ -98,7 +98,7 @@ const bookFreeSlots = async (page: Page): Promise<string[]> => {
  */
 const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): Promise<string> => {
   const freeSlots = await page
-    .waitForSelector(PAGE.SLOT, { visible: true })
+    .waitForXPath(`${PAGE.SLOTS_XP}`, { visible: true })
     .then(async () => await page.$$(PAGE.FREE_SLOT));
   console.log(`Found ${freeSlots.length} free slots ready to be booked`);
 
