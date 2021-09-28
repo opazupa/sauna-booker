@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import chrome from 'chrome-aws-lambda';
 import puppeteer, { Browser, Page } from 'puppeteer-core';
 

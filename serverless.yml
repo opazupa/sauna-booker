@@ -73,7 +73,7 @@ resources:
     BookingErrorBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub ${opt:stage}-car-bucket
+        BucketName: !Sub ${opt:stage}-sauna-booking-error-bucket
         PublicAccessBlockConfiguration:
           BlockPublicAcls: True
           IgnorePublicAcls: True
