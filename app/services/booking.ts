@@ -67,11 +67,11 @@ const bookFreeSlots = async (page: Page): Promise<string[]> => {
     else {
       await page.click(PAGE.NEXT_WEEK_BUTTON).then(() => console.log(`It's monday, moved to next week instead.`));
       await page.$$(`.${PAGE.SELECT_DAY_BADGE}`).then(async ([monday]) => await monday.click());
-      await page
-        .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
-        .then((text) => console.log(`${text}is selected now from the calendar.`));
     }
   });
+  await page
+    .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
+    .then((text) => console.log(`${text}is selected finally from the calendar.`));
   const statuses = [];
   statuses.push(await bookNextSlot(page, saunaDayPreference));
   if (saunaDayPreference.double) {
