@@ -13,11 +13,28 @@ provider:
     Owner: Olli Saarinen
     Project: sauna-booker-${opt:stage}
   environment:
+    AWS_S3_URL: !Join ['', ['https://', !GetAtt ["BookingErrorBucket", "DomainName"]]]
+    AWS_S3_ACCESS_KEY: !Ref S3UserAccessKey
+    AWS_S3_ACCESS_SECRET: !GetAtt ["S3UserAccessKey", "SecretAccessKey"]
+    AWS_S3_BUCKET: !Ref BookingErrorBucket
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 's3:PutObject'
+          Resource:
+            Fn::Join:
+              - ''
+              - - 'arn:aws:s3:::'
+                - Ref: BookingErrorBucket
+                - '/*'
 
 
 package:
   exclude:
     - .env.dev
+    - data
 
 functions:
   book-sauna:
@@ -45,3 +62,39 @@ plugins:
   - serverless-plugin-typescript
   - serverless-dotenv-plugin
   - serverless-offline
+
+# AWS cloudformation resources
+resources:
+
+  Conditions:
+    IsProd: !Equals ["${opt:stage}", "prod"]
+
+  Resources:
+    BookingErrorBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub ${opt:stage}-car-bucket
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: True
+          IgnorePublicAcls: True
+          RestrictPublicBuckets: True
+
+    S3User:
+      Type: AWS::IAM::User
+      Properties:
+        Policies:
+          - PolicyName: bucket-access
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+              - Effect: Allow
+                Action:
+                - s3:*
+                Resource:
+                  - !Sub arn:aws:s3:::${BookingErrorBucket}
+                  - !Sub arn:aws:s3:::${BookingErrorBucket}/*
+
+    S3UserAccessKey:
+      Type: AWS::IAM::AccessKey
+      Properties:
+        UserName: !Ref S3User

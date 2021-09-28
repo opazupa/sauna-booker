@@ -4,9 +4,16 @@
 help:	## Show this help
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
 
-setup:  ## Setup environment
+setup:  			## Setup environment
 	npm install
 	cp .env.dev .env
+	make start-services
 
-book:  	## Book sauna
+start-services:			## Start local dev services
+	docker-compose up
+
+stop-services:			## Stop local dev services
+	docker-compose down
+
+book:  				## Book sauna
 	npm run invoke -- book-sauna --data '{"ignoreMidnight":true}'

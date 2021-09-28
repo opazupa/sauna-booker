@@ -61,6 +61,10 @@ export interface IConfiguration {
   isDev: () => boolean;
   aws: {
     region: string;
+    url: string;
+    accessKey: string;
+    accessSecret: string;
+    bucket: string;
   };
   booking: {
     userName: string;
@@ -85,6 +89,10 @@ dotenv.config();
 const {
   APP_ENV,
   AWS_S3_REGION,
+  AWS_S3_BUCKET,
+  AWS_S3_URL,
+  AWS_S3_ACCESS_KEY,
+  AWS_S3_ACCESS_SECRET,
   SENTRY_DSN,
   SENTRY_ENV,
   NODE_ENV,
@@ -104,7 +112,11 @@ const {
 export const Configuration: IConfiguration = {
   isDev: () => APP_ENV === DEVELOPMENT,
   aws: {
+    url: AWS_S3_URL,
     region: AWS_S3_REGION,
+    accessKey: AWS_S3_ACCESS_KEY,
+    accessSecret: AWS_S3_ACCESS_SECRET,
+    bucket: AWS_S3_BUCKET,
   },
   booking: {
     userName: BOOKING_USERNAME,

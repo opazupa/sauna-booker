@@ -2,6 +2,7 @@ import { Handler } from 'aws-lambda';
 
 import { Configuration } from './configuration';
 import { bookSaunaSlot } from './services/booking';
+import { saveErrorScreenShot } from './services/s3';
 import { sendNotification } from './services/telegram';
 import { getBookingZoneTime, hasSaunaPreference, isMidnight, setup, wrapHandler } from './utils';
 
@@ -15,7 +16,7 @@ type BookSaunaParams = {
 /**
  * Book sauna by the configuration
  */
-export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event) => {
+export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, context) => {
   const today = getBookingZoneTime();
   event.ignoreMidnight = true;
   // Return if the trigger is not on the midnight
@@ -38,9 +39,13 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event) => 
       console.log(status);
       await sendNotification(status);
     }
-    browser.close();
+    await browser.close();
   } catch (err) {
-    browser.close();
+    await page
+      .screenshot({ fullPage: true })
+      .then(async (screenShot) => await saveErrorScreenShot(<Buffer>screenShot, context.awsRequestId, today))
+      .catch((err) => console.error(err));
+    await browser.close();
     throw err;
   }
 });

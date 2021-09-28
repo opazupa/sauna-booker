@@ -16,6 +16,7 @@ export const setup = async (config: IConfiguration): Promise<{ browser: Browser;
     args: config.isDev() ? ['--no-sandboxs'] : chrome.args,
     devtools: config.isDev(),
     headless: !config.isDev(),
+    defaultViewport: null,
     slowMo: config.isDev() ? 250 : null,
   });
   const page = await browser.newPage();
