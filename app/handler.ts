@@ -17,7 +17,7 @@ type BookSaunaParams = {
  */
 export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event) => {
   const today = getBookingZoneTime();
-
+  event.ignoreMidnight = true;
   // Return if the trigger is not on the midnight
   if (!(event.ignoreMidnight || isMidnight())) {
     console.log(`No midnight, no trigger. The time in booking timezone is ${today.toString()} 🤔`);
