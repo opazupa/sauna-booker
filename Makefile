@@ -6,8 +6,7 @@ help:	## Show this help
 
 setup:  			## Setup environment
 	npm install
-	cp .env.dev .env
-	make start-services
+	cp -n .env.dev .env.local
 
 start-services:			## Start local dev services
 	docker-compose up

@@ -34,6 +34,7 @@ provider:
 package:
   exclude:
     - .env.dev
+    - .env.local
     - data
 
 functions:
