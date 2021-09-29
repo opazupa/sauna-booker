@@ -20,6 +20,8 @@ export const setup = async (config: IConfiguration): Promise<{ browser: Browser;
   });
   const page = await browser.newPage();
   page.setDefaultTimeout(60000);
+  await page.emulateTimezone(config.booking.timezone);
+
   return { browser, page };
 };
 

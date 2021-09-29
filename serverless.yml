@@ -48,7 +48,7 @@ functions:
       - schedule:
           # Helsinki timezone is UTC+2|3. 
           # This UTC trigger will run 00.01 or 1.01 in Helsinki every day
-          rate: cron(1,30 21-22,1 ? * MON-SUN *)  
+          rate: cron(1 21-22,0 ? * MON-SUN *)  
           enabled: true
           input:
             ignoreMidnight: false
