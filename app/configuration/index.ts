@@ -44,9 +44,9 @@ export const DefaultSaunaPreferences: SaunaPreferences = {
   Fri: {
     time: 'LAST',
   },
-  Sat: {
-    time: 'MIDDLE',
-  },
+  // Sat: {
+  //   time: 'MIDDLE',
+  // },
   Sun: {
     time: 'LAST',
   },
