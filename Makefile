@@ -9,7 +9,7 @@ setup:  			## Setup environment
 	cp -n .env.dev .env.local
 
 start-services:			## Start local dev services
-	docker-compose up
+	docker-compose --env-file ./.env.local up
 
 stop-services:			## Stop local dev services
 	docker-compose down

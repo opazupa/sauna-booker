@@ -31,7 +31,7 @@ Fetches new car ad info from _**Nettiauto**_ and stores them for later analysis.
 
 ### Env variables
 
-After `make setup` replace your variables to placeholders.
+After `make setup` replace your in [.env.local](./.env.local)variables to placeholders.
 
 ### Running locally
 
