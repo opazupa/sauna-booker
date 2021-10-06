@@ -1,6 +1,5 @@
 import { Handler } from 'aws-lambda';
 
-import { Configuration } from './configuration';
 import { bookSaunaSlot } from './services/booking';
 import { saveErrorScreenShot } from './services/s3';
 import { sendNotification } from './services/telegram';
@@ -30,7 +29,7 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, con
     return;
   }
 
-  const { browser, page } = await setup(Configuration);
+  const { browser, page } = await setup();
 
   try {
     const statuses = await bookSaunaSlot(page);

@@ -1,26 +1,28 @@
 import chrome from 'chrome-aws-lambda';
 import puppeteer, { Browser, Page } from 'puppeteer-core';
 
-import { IConfiguration } from '../configuration';
+import { Configuration } from '../configuration';
+
+const { isDev, chromeExecPath, booking } = Configuration;
 
 /**
  * Setup puppeteer browser and page
  *
- * @param {IConfiguration} config
  * @returns {Promise<{ browser: Browser; page: Page }>}
  */
-export const setup = async (config: IConfiguration): Promise<{ browser: Browser; page: Page }> => {
+export const setup = async (): Promise<{ browser: Browser; page: Page }> => {
+  const devEnv = isDev();
   const browser = await puppeteer.launch({
-    executablePath: config.isDev() ? config.chromeExecPath : await chrome.executablePath,
-    args: config.isDev() ? ['--no-sandboxs'] : chrome.args,
-    devtools: config.isDev(),
-    headless: !config.isDev(),
+    executablePath: devEnv ? chromeExecPath : await chrome.executablePath,
+    args: devEnv ? ['--no-sandboxs'] : chrome.args,
+    devtools: devEnv,
+    headless: !devEnv,
     defaultViewport: null,
-    slowMo: config.isDev() ? 250 : null,
+    slowMo: devEnv ? 250 : null,
   });
   const page = await browser.newPage();
   page.setDefaultTimeout(60000);
-  await page.emulateTimezone(config.booking.timezone);
+  await page.emulateTimezone(booking.timezone);
 
   return { browser, page };
 };

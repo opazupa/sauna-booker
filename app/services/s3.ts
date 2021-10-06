@@ -22,9 +22,9 @@ const s3 = new AWS.S3({
  * @param {DateTime} dateInfo
  */
 export const saveErrorScreenShot = async (screenShot: Buffer, requestId: string, dateInfo: DateTime) => {
-  const fileName = `${requestId}-${dateInfo.toISO()}.png`;
+  const fileName = `${dateInfo.toISO()}/${requestId}.png`;
 
-  // Upload parameters
+  // Upload parameterss
   const params = {
     Bucket: aws.bucket,
     Key: fileName,
