@@ -2,7 +2,7 @@
 
 > _**Home**_ `sauna-booker` 📖 📅
 
-Books sauna slots for you automatcally based on your preferences. 🎢
+Books sauna slots for you automatically based on your preferences. 🎢
 
 ## Features 📦💥
 
