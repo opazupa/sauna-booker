@@ -2,7 +2,7 @@
 
 > _**Home**_ `sauna-booker` 📖 📅
 
-Fetches new car ad info from _**Nettiauto**_ and stores them for later analysis.
+Books sauna slots for you automatcally based on your preferences. 🎢
 
 ## Features 📦💥
 
@@ -23,7 +23,6 @@ Fetches new car ad info from _**Nettiauto**_ and stores them for later analysis.
 - Cloudformation deployment
 
 ## How to get started 👋
-
 
 
 > Install `docker` & `npm` beofre continuing
