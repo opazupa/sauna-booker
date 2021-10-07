@@ -2,11 +2,11 @@
 
 > _**Home**_ `sauna-booker` 📖 📅
 
-Books sauna slots for you automatically based on your preferences. 🎢
+Books sauna slots for you automatically based on your preferences when they are published. 🎢
 
 ## Features 📦💥
 
-- Book sauna slots automatically with **puppeteer** runnning in AWS Lambda
+- Book sauna slots (4 weeks inito future) automatically with **puppeteer** runnning in AWS Lambda
 - Daily [configurable sauna preferences](./app/configuration/sauna-preference.ts) for booking.
 - Serverless framework + Cloudformation for infra.
 - _**Sentry.io**_ on issue lookout!
@@ -25,12 +25,12 @@ Books sauna slots for you automatically based on your preferences. 🎢
 ## How to get started 👋
 
 
-> Install `docker` & `npm` beofre continuing
+> Install `docker`, `make` & `npm` beofre continuing
 
 
 ### Env variables
 
-After `make setup` replace your in [.env.local](./.env.local)variables to placeholders.
+After `make setup` replace your in variables to placeholders in [.env.local](./.env.local).
 
 ### Running locally
 
