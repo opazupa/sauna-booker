@@ -34,15 +34,15 @@ export const DefaultSaunaPreferences: SaunaPreferences = {
   // Wed: {
   //   time: 'LAST',
   // },
-  // Thu: {
-  //   time: 'LAST',
-  // },
+  Thu: {
+    time: 'LAST',
+  },
   Fri: {
     time: 'LAST',
   },
-  // Sat: {
-  //   time: 'MIDDLE',
-  // },
+  Sat: {
+    time: 'MIDDLE',
+  },
   Sun: {
     time: 'LAST',
   },
