@@ -48,7 +48,7 @@ export const bookSaunaSlot = async (page: Page) => {
 const bookFreeSlots = async (page: Page): Promise<string[]> => {
   const bookingDay = getBookingSlotDate().day;
   const saunaDayPreference = hasSaunaPreference();
-  console.log(`Found sauna preferennces for the day: ${JSON.stringify(saunaDayPreference)}`);
+  console.log(`Found sauna preferences for the day: ${JSON.stringify(saunaDayPreference)}`);
 
   // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
   await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, BOOKING_WEEKS_AHEAD);
