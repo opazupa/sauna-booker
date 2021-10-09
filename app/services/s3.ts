@@ -22,7 +22,7 @@ const s3 = new AWS.S3({
  * @param {DateTime} dateInfo
  */
 export const saveErrorScreenShot = async (screenShot: Buffer, requestId: string, dateInfo: DateTime) => {
-  const fileName = `${dateInfo.toLocaleString()}/${requestId}.png`;
+  const fileName = `${dateInfo.toFormat('yyyy/MM/dd')}/${requestId}_${dateInfo.minute}.png`;
 
   // Upload parameterss
   const params = {

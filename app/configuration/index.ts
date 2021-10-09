@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 
-import { DefaultSaunaPreferences, SaunaPreferences } from './sauna-preference';
+import { ConfiguredSaunaPreferences, SaunaPreferences } from './sauna-preference';
 
 export { SaunaDay } from './sauna-preference';
 
@@ -76,7 +76,7 @@ export const Configuration: IConfiguration = {
     userName: BOOKING_USERNAME,
     password: BOOKING_PASSWORD,
     timezone: BOOKING_TIMEZONE,
-    saunaDayPreferences: DefaultSaunaPreferences,
+    saunaDayPreferences: ConfiguredSaunaPreferences,
   },
   sentry: {
     dsn: SENTRY_DSN,

@@ -46,27 +46,29 @@ export const bookSaunaSlot = async (page: Page) => {
  * @returns {Promise<string[]>}
  */
 const bookFreeSlots = async (page: Page): Promise<string[]> => {
-  const bookingDay = getBookingSlotDate().day;
+  const bookingDate = getBookingSlotDate();
   const saunaDayPreference = hasSaunaPreference();
-  console.log(`Found sauna preferences for the day: ${JSON.stringify(saunaDayPreference)}`);
+  console.log(`Found sauna preferences for  ${bookingDate.weekdayShort} : ${JSON.stringify(saunaDayPreference)}`);
 
   // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
   await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, BOOKING_WEEKS_AHEAD);
 
   // Reselect the day and handle sunday/monday
-  await page.$x(`//div[contains(@class, ${PAGE.SELECT_DAY_BADGE})][text()="${bookingDay}"]`).then(async ([button]) => {
-    await page
-      .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
-      // Log info on which date was selected by default
-      .then((text) => console.log(`${text}is selected by default from the calendar.`));
+  await page
+    .$x(`//div[contains(@class, ${PAGE.SELECT_DAY_BADGE})][text()="${bookingDate.day}"]`)
+    .then(async ([button]) => {
+      await page
+        .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
+        // Log info on which date was selected by default
+        .then((text) => console.log(`${text}is selected by default from the calendar.`));
 
-    if (button) await button.click().then(() => console.log(`Reclicked the button for day ${bookingDay}`));
-    // It's monday, and the date is actually on the next week. Select monday as well.
-    else {
-      await page.click(PAGE.NEXT_WEEK_BUTTON).then(() => console.log(`It's monday, moved to next week instead.`));
-      await page.$$(`.${PAGE.SELECT_DAY_BADGE}`).then(async ([monday]) => await monday.click());
-    }
-  });
+      if (button) await button.click().then(() => console.log(`Reclicked the button for day ${bookingDate.day}`));
+      // It's monday, and the date is actually on the next week. Select monday as well.
+      else {
+        await page.click(PAGE.NEXT_WEEK_BUTTON).then(() => console.log(`It's monday, moved to next week instead.`));
+        await page.$$(`.${PAGE.SELECT_DAY_BADGE}`).then(async ([monday]) => await monday.click());
+      }
+    });
   await page
     .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
     .then((text) => console.log(`${text}is selected finally from the calendar.`));
@@ -108,7 +110,7 @@ const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): P
 
   const selectedSlot = selectPreferredSaunaSlot(freeSlots, preference);
   const selectedSlotText = await page.evaluate((selectedSlot) => <string>selectedSlot.textContent, selectedSlot);
-  await selectedSlot.click({}).then(() => console.log(`Clicked on ${selectedSlotText} slot tile.`));
+  await selectedSlot.click().then(() => console.log(`Clicked on ${selectedSlotText} slot tile.`));
 
   await page
     .waitForSelector(PAGE.CONFIRM_BUTTON, { visible: true })
