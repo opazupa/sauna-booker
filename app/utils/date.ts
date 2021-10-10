@@ -6,6 +6,7 @@ const { timezone, saunaDayPreferences } = Configuration.booking;
 
 export const BOOKING_WEEKS_AHEAD = 4;
 const WEEKLY_BOOKING_LIMIT = 2;
+const BOOKING_OPENING_HOUR = 1;
 
 /**
  * Check if sauna preference is configured for today
@@ -44,8 +45,8 @@ export const getBookingSlotDate = (): DateTime => {
 };
 
 /**
- * Is it midnight in the booking time zone
+ * Are bookings opened for the day
  *
  * @returns {boolean}
  */
-export const isMidnight = (): boolean => getBookingZoneTime().hour === 0;
+export const bookingsOpened = (): boolean => getBookingZoneTime().hour === BOOKING_OPENING_HOUR;

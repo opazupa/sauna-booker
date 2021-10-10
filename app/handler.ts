@@ -3,13 +3,13 @@ import { Handler } from 'aws-lambda';
 import { bookSaunaSlot } from './services/booking';
 import { saveErrorScreenShot } from './services/s3';
 import { sendNotification } from './services/telegram';
-import { getBookingZoneTime, hasSaunaPreference, isMidnight, setup, wrapHandler } from './utils';
+import { bookingsOpened, getBookingZoneTime, hasSaunaPreference, setup, wrapHandler } from './utils';
 
 /**
  * Book sauna event parameters
  */
 type BookSaunaParams = {
-  ignoreMidnight: boolean;
+  ignoreOpeningHour: boolean;
 };
 
 /**
@@ -17,9 +17,9 @@ type BookSaunaParams = {
  */
 export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, context) => {
   const today = getBookingZoneTime();
-  // Return if the trigger is not on the midnight
-  if (!(event.ignoreMidnight || isMidnight())) {
-    console.log(`No midnight, no trigger. The time in booking timezone is ${today.toString()} 🤔`);
+  // Return if the trigger is not on the booking opening hour
+  if (!(event.ignoreOpeningHour || bookingsOpened())) {
+    console.log(`No opening hour, no trigger. The time in booking timezone is ${today.toString()} 🤔`);
     return;
   }
 

@@ -15,4 +15,4 @@ stop-services:			## Stop local dev services
 	docker-compose down
 
 book:  				## Book sauna
-	npm run invoke -- book-sauna --data '{"ignoreMidnight":true}'
+	npm run invoke -- book-sauna --data '{"ignoreOpeningHour":true}'
