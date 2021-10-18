@@ -191,9 +191,6 @@ const navigateToBookings = async (page: Page) => {
     .waitForSelector(PAGE.NEW_BOOKING_BUTTON, { visible: true })
     .then((button) => button.click())
     .then(() => console.log('Booking calendar visible. Ready to start booking.'));
-
-  // TODO remove
-  await page.waitForSelector('select[name=calendar]').then((dropdown) => dropdown.select('2530'));
 };
 
 /**
