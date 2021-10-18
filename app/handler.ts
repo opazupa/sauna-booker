@@ -2,7 +2,6 @@ import { Handler } from 'aws-lambda';
 
 import { bookSaunaSlots } from './services/booking';
 import { createInvite } from './services/calendar';
-import { saveErrorScreenShot } from './services/s3';
 import { sendNotification } from './services/telegram';
 import { bookingsOpened, getBookingZoneTime, hasSaunaPreference, setup, wrapHandler } from './utils';
 
@@ -41,10 +40,6 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, con
     }
     await browser.close();
   } catch (err) {
-    await page
-      .screenshot({ fullPage: true })
-      .then(async (screenShot) => await saveErrorScreenShot(<Buffer>screenShot, context.awsRequestId, today))
-      .catch((err) => console.error(err));
     await browser.close();
     throw err;
   }
