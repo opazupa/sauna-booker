@@ -71,4 +71,4 @@ jobs:
         run: npm ci
 
       - name: Deploy serverless stack
-        run: sls deploy --stage prod
+        run: sls deploy --stage prod --force
