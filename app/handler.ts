@@ -1,6 +1,7 @@
 import { Handler } from 'aws-lambda';
 
-import { bookSaunaSlot } from './services/booking';
+import { bookSaunaSlots } from './services/booking';
+import { createInvite } from './services/calendar';
 import { saveErrorScreenShot } from './services/s3';
 import { sendNotification } from './services/telegram';
 import { bookingsOpened, getBookingZoneTime, hasSaunaPreference, setup, wrapHandler } from './utils';
@@ -32,10 +33,11 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, con
   const { browser, page } = await setup();
 
   try {
-    const statuses = await bookSaunaSlot(page);
-    for (const status of statuses) {
-      console.log(status);
-      await sendNotification(status);
+    const bookings = await bookSaunaSlots(page);
+    for (const booking of bookings) {
+      console.log(booking.status);
+      await sendNotification(booking.status);
+      if (!booking.error) createInvite({ ...booking });
     }
     await browser.close();
   } catch (err) {

@@ -41,7 +41,9 @@ export const getBookingZoneTime = (): DateTime => {
 export const getBookingSlotDate = (): DateTime => {
   return DateTime.fromObject({
     zone: timezone,
-  }).plus({ weeks: BOOKING_WEEKS_AHEAD });
+  })
+    .plus({ weeks: BOOKING_WEEKS_AHEAD })
+    .set({ second: 0, minute: 0 });
 };
 
 /**

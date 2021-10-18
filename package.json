@@ -21,12 +21,15 @@
     "@types/luxon": "^1.26.3",
     "@types/node": "^14.14.37",
     "@types/puppeteer-core": "^5.4.0",
+    "@types/server-destroy": "^1.0.1",
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
     "eslint": "^7.23.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "googleapis": "^88.2.0",
     "prettier": "^2.4.1",
+    "server-destroy": "^1.0.1",
     "serverless": "2.33.1",
     "serverless-dotenv-plugin": "^3.9.0",
     "serverless-offline": "^6.5.0",
@@ -38,6 +41,7 @@
     "lint": "eslint . --ext .ts",
     "local": "serverless offline --stage dev",
     "invoke": "serverless invoke local --stage dev --function",
-    "build": "serverless package --stage prod"
+    "build": "serverless package --stage prod",
+    "generate-token": "ts-node ./utils/refresh-token.ts"
   }
 }

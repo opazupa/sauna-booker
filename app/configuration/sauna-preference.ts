@@ -24,16 +24,16 @@ export type SaunaPreferences = {
  */
 export const ConfiguredSaunaPreferences: SaunaPreferences = {
   // Only two should be enabled due sauna booking limit per week 2
-  // Mon: {
-  //   time: 'FIRST',
-  //   double: true,
-  // },
-  // Tue: {
-  //   time: 'LAST',
-  // },
-  // Wed: {
-  //   time: 'LAST',
-  // },
+  Mon: {
+    time: 'FIRST',
+    // double: true,
+  },
+  Tue: {
+    time: 'LAST',
+  },
+  Wed: {
+    time: 'LAST',
+  },
   Thu: {
     time: 'LAST',
   },

@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { ElementHandle, Page } from 'puppeteer-core';
 
 import { Configuration, SaunaDay } from '../configuration';
@@ -26,12 +27,22 @@ const PAGE = {
 };
 
 /**
- * Book a sauna slot
+ * Sauna booking
+ */
+export type SaunaBooking = {
+  end?: DateTime;
+  start?: DateTime;
+  error?: boolean;
+  status: string;
+};
+
+/**
+ * Book sauna slots
  *
  * @param {Page} page
  * @returns
  */
-export const bookSaunaSlot = async (page: Page) => {
+export const bookSaunaSlots = async (page: Page) => {
   // Go to home site
   await page.goto(HOME_URL);
   await login(page);
@@ -43,9 +54,9 @@ export const bookSaunaSlot = async (page: Page) => {
  * Book sauna slot(s) based on configuration
  *
  * @param {Page} page
- * @returns {Promise<string[]>}
+ * @returns {Promise<SaunaBooking[]>}
  */
-const bookFreeSlots = async (page: Page): Promise<string[]> => {
+const bookFreeSlots = async (page: Page): Promise<SaunaBooking[]> => {
   const bookingDate = getBookingSlotDate();
   const saunaDayPreference = hasSaunaPreference();
   console.log(`Found sauna preferences for  ${bookingDate.weekdayShort} : ${JSON.stringify(saunaDayPreference)}`);
@@ -72,12 +83,12 @@ const bookFreeSlots = async (page: Page): Promise<string[]> => {
   await page
     .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
     .then((text) => console.log(`${text}is selected finally from the calendar.`));
-  const statuses = [];
-  statuses.push(await bookNextSlot(page, saunaDayPreference));
+  const bookings = [];
+  bookings.push(await bookNextSlot(page, saunaDayPreference));
   if (saunaDayPreference.double) {
     console.log('Double preference selected for the day. Continueing to second booking');
     await bookNextSlot(page, saunaDayPreference, DOUBLE_BOOK)
-      .then((status) => statuses.push(status))
+      .then((status) => bookings.push(status))
       .catch((err) => {
         // Don't rethrow err due we want to retun at least the one status
         console.log('Something went wrong on the second booking :8!');
@@ -85,7 +96,7 @@ const bookFreeSlots = async (page: Page): Promise<string[]> => {
       });
   }
 
-  return statuses;
+  return bookings;
 };
 
 /**
@@ -94,9 +105,9 @@ const bookFreeSlots = async (page: Page): Promise<string[]> => {
  * @param {Page} page
  * @param {SaunaDay} preference
  * @param {boolean} [double=false]
- * @returns {Promise<string>}
+ * @returns {Promise<SaunaBooking>}
  */
-const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): Promise<string> => {
+const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): Promise<SaunaBooking> => {
   const freeSlots = await page
     .waitForXPath(`${PAGE.SLOTS_XP}`, { visible: true })
     .then(async () => await page.$$(PAGE.FREE_SLOT));
@@ -105,7 +116,7 @@ const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): P
   // Stop the process if not free slots are there
   if (freeSlots.length === 0) {
     if (!double) throw Error('No slots available 😓');
-    else return `Failed to book double on ${getBookingSlotDate().toFormat(`ccc d'.' LLLL`)}`;
+    else return { error: true, status: `Failed to book double on ${getBookingSlotDate().toFormat(`ccc d'.' LLLL`)}` };
   }
 
   const selectedSlot = selectPreferredSaunaSlot(freeSlots, preference);
@@ -122,12 +133,18 @@ const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): P
   const mySlotsConfirmed = await page.waitForXPath(`${PAGE.MY_BOOKED_SLOT_XP}[${double ? 2 : 1}]`);
 
   if (mySlotsConfirmed) console.log(`Verify booking (${double ? 2 : 1}) confirmation.`);
-  else return 'Failed to verify the new booking 😓';
+  else return { error: true, status: 'Failed to verify the new booking 😓' };
 
-  return `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
-    'vapaa',
-    '',
-  )} on ${getBookingSlotDate().toFormat(`ccc d'.' LLLL`)}. 👌👌`;
+  // Formatted like 19.00-20.00...
+  const startHour = parseInt(selectedSlotText.substring(0, 2));
+  return {
+    status: `Booked sauna slot for you sir! 🙏 It is at ${selectedSlotText.replace(
+      'vapaa',
+      '',
+    )} on ${getBookingSlotDate().toFormat(`ccc d'.' LLLL`)}. 👌👌`,
+    start: getBookingSlotDate().set({ hour: startHour }),
+    end: getBookingSlotDate().set({ hour: startHour + 1 }),
+  };
 };
 
 /**
@@ -174,6 +191,9 @@ const navigateToBookings = async (page: Page) => {
     .waitForSelector(PAGE.NEW_BOOKING_BUTTON, { visible: true })
     .then((button) => button.click())
     .then(() => console.log('Booking calendar visible. Ready to start booking.'));
+
+  // TODO remove
+  await page.waitForSelector('select[name=calendar]').then((dropdown) => dropdown.select('2530'));
 };
 
 /**

@@ -58,6 +58,10 @@ jobs:
           touch .env
           echo BOOKING_USERNAME=${{ secrets.BOOKING_USERNAME }} >> .env
           echo BOOKING_PASSWORD=${{ secrets.BOOKING_PASSWORD }} >> .env
+          echo GOOGLE_CALENDAR_CLIENT_ID=${{ secrets.GOOGLE_CALENDAR_CLIENT_ID }} >> .env
+          echo GOOGLE_CALENDAR_CLIENT_SECRET=${{ secrets.GOOGLE_CALENDAR_CLIENT_SECRET }} >> .env
+          echo GOOGLE_CALENDAR_REFRESH_TOKEN=${{ secrets.GOOGLE_CALENDAR_REFRESH_TOKEN }} >> .env
+          echo GOOGLE_CALENDAR_ATTENDEES=${{ secrets.GOOGLE_CALENDAR_ATTENDEES }} >> .env
           echo TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }} >> .env
           echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
           echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env

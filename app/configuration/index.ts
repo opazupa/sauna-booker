@@ -26,6 +26,12 @@ export interface IConfiguration {
     timezone: string;
     saunaDayPreferences: SaunaPreferences;
   };
+  google: {
+    clientId: string;
+    clientSecret: string;
+    refreshToken: string;
+    attendees: string[];
+  };
   sentry: {
     dsn: string;
     env: string;
@@ -47,6 +53,10 @@ const {
   AWS_S3_URL,
   AWS_S3_ACCESS_KEY,
   AWS_S3_ACCESS_SECRET,
+  GOOGLE_CALENDAR_CLIENT_ID,
+  GOOGLE_CALENDAR_CLIENT_SECRET,
+  GOOGLE_CALENDAR_REFRESH_TOKEN,
+  GOOGLE_CALENDAR_ATTENDEES,
   SENTRY_DSN,
   SENTRY_ENV,
   NODE_ENV,
@@ -77,6 +87,12 @@ export const Configuration: IConfiguration = {
     password: BOOKING_PASSWORD,
     timezone: BOOKING_TIMEZONE,
     saunaDayPreferences: ConfiguredSaunaPreferences,
+  },
+  google: {
+    clientId: GOOGLE_CALENDAR_CLIENT_ID,
+    clientSecret: GOOGLE_CALENDAR_CLIENT_SECRET,
+    refreshToken: GOOGLE_CALENDAR_REFRESH_TOKEN,
+    attendees: GOOGLE_CALENDAR_ATTENDEES.split(','),
   },
   sentry: {
     dsn: SENTRY_DSN,
