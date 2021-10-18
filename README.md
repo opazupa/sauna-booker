@@ -48,3 +48,10 @@ make book
 | --------------- | --------------------------------------------- |
 | `npm run build` | Build the `serverless` stack with `typescript` |
 | `npm run lint`  | Run `eslint` to check code style                    |
+
+
+#### Updating google **refresh token**
+1. Go to google console to fetch the OAuth client configs
+2. Run `make refresh-token`
+3. Give consent for google for access and follow instructions
+4. Get the new **refresh token** from the console.

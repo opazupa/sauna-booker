@@ -32,7 +32,7 @@ export const createInvite = (params: InviteParams) => {
         auth: oauth2Client,
         calendarId: 'primary',
         requestBody: {
-          summary: 'Saunavuoro',
+          summary: 'Saunavuoro 💥',
           location: 'Harjus kattosauna',
           end: {
             dateTime: params.end.toString(),
