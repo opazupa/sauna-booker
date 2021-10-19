@@ -32,6 +32,7 @@ provider:
 
 
 package:
+  individually: true
   exclude:
     - .env.dev
     - .env.local
@@ -55,12 +56,15 @@ functions:
 
 
 custom:
+  webpack:
+    packager: npm
+    includeModules: false
   # Local development
   serverless-offline:
     httpPort: 4000
 
 plugins:
-  - serverless-plugin-typescript
+  - serverless-webpack
   - serverless-dotenv-plugin
   - serverless-offline
 

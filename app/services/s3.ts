@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import S3, { PutObjectRequest } from 'aws-sdk/clients/s3';
 import { DateTime } from 'luxon';
 
 import { Configuration } from '../configuration';
@@ -6,7 +6,7 @@ import { Configuration } from '../configuration';
 const { aws, isDev } = Configuration;
 
 // Create S3 service object
-const s3 = new AWS.S3({
+const s3 = new S3({
   region: aws.region,
   endpoint: `${aws.url}${isDev() ? `/${aws.bucket}` : ''}`, // Minion dev requirement
   accessKeyId: aws.accessKey,
@@ -29,7 +29,7 @@ export const saveErrorScreenShot = async (screenShot: Buffer, requestId: string,
     Bucket: aws.bucket,
     Key: fileName,
     Body: screenShot,
-  } as AWS.S3.PutObjectRequest;
+  } as PutObjectRequest;
 
   // Upload file to the bucket
   await s3
