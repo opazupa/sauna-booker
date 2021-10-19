@@ -15,5 +15,5 @@
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "prettier/prettier": "warn"
     },
-    "ignore": ["webpack.config.js"]
+    "ignorePatterns": ["webpack.config.js"]
   }
