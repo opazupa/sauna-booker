@@ -58,7 +58,7 @@ functions:
 custom:
   webpack:
     packager: npm
-    includeModules: false
+    includeModules: true
   # Local development
   serverless-offline:
     httpPort: 4000
