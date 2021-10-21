@@ -14,6 +14,9 @@ oauth2Client.setCredentials({
   refresh_token: Configuration.google.refreshToken,
 });
 
+/**
+ * Calendar invite params
+ */
 type InviteParams = {
   end?: DateTime;
   start?: DateTime;
@@ -37,6 +40,10 @@ export const createInvite = (params: InviteParams) => {
           end: {
             dateTime: params.end.toString(),
             timeZone: Configuration.booking.timezone,
+          },
+          reminders: {
+            useDefault: false,
+            overrides: [{ method: 'popup', minutes: 30 }],
           },
           start: {
             dateTime: params.start.toString(),
