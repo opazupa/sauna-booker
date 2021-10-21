@@ -5,7 +5,7 @@ import { Configuration, SaunaDay } from '../configuration';
 import { BOOKING_WEEKS_AHEAD, getBookingSlotDate, hasSaunaPreference, repeatClick, shortPause } from '../utils';
 
 // Site home URL
-const HOME_URL = 'https://plus.yitgroup.com';
+const HOME_URL = Configuration.booking.site;
 const DOUBLE_BOOK = true;
 
 /**

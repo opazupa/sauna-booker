@@ -21,6 +21,7 @@ export interface IConfiguration {
     bucket: string;
   };
   booking: {
+    site: string;
     userName: string;
     password: string;
     timezone: string;
@@ -83,6 +84,7 @@ export const Configuration: IConfiguration = {
     bucket: AWS_S3_BUCKET,
   },
   booking: {
+    site: 'https://plus.yitgroup.com',
     userName: BOOKING_USERNAME,
     password: BOOKING_PASSWORD,
     timezone: BOOKING_TIMEZONE,

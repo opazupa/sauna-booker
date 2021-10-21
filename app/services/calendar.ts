@@ -5,6 +5,7 @@ import { Configuration } from '../configuration';
 
 const calendar = google.calendar('v3');
 const { refreshToken, attendees } = Configuration.google;
+const { booking } = Configuration;
 
 /**
  * Create a new OAuth2 client with the configured keys.
@@ -37,6 +38,7 @@ export const createInvite = ({ end, start, timeZone }: InviteParams) => {
       calendar.events.insert({
         auth: oauth2Client,
         calendarId: 'primary',
+        sendUpdates: 'all',
         requestBody: {
           summary: 'Saunavuoro 💥',
           location: 'Harjus kattosauna',
@@ -47,6 +49,9 @@ export const createInvite = ({ end, start, timeZone }: InviteParams) => {
           reminders: {
             useDefault: false,
             overrides: [{ method: 'popup', minutes: 30 }],
+          },
+          source: {
+            url: booking.site,
           },
           start: {
             dateTime: start.toString(),
