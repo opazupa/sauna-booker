@@ -4,14 +4,16 @@ import { DateTime } from 'luxon';
 import { Configuration } from '../configuration';
 
 const calendar = google.calendar('v3');
+const { refreshToken, attendees } = Configuration.google;
 
 /**
  * Create a new OAuth2 client with the configured keys.
  */
 const oauth2Client = new google.auth.OAuth2(Configuration.google.clientId, Configuration.google.clientSecret);
+
 // Set the refresh token
 oauth2Client.setCredentials({
-  refresh_token: Configuration.google.refreshToken,
+  refresh_token: refreshToken,
 });
 
 /**
@@ -20,6 +22,7 @@ oauth2Client.setCredentials({
 type InviteParams = {
   end?: DateTime;
   start?: DateTime;
+  timeZone?: string;
 };
 
 /**
@@ -27,7 +30,7 @@ type InviteParams = {
  *
  * @param {InviteParams} params
  */
-export const createInvite = (params: InviteParams) => {
+export const createInvite = ({ end, start, timeZone }: InviteParams) => {
   oauth2Client
     .getRequestHeaders()
     .then(() =>
@@ -38,20 +41,18 @@ export const createInvite = (params: InviteParams) => {
           summary: 'Saunavuoro 💥',
           location: 'Harjus kattosauna',
           end: {
-            dateTime: params.end.toString(),
-            timeZone: Configuration.booking.timezone,
+            dateTime: end.toString(),
+            timeZone,
           },
           reminders: {
             useDefault: false,
             overrides: [{ method: 'popup', minutes: 30 }],
           },
           start: {
-            dateTime: params.start.toString(),
-            timeZone: Configuration.booking.timezone,
+            dateTime: start.toString(),
+            timeZone,
           },
-          attendees: Configuration.google.attendees.map((email: string) => {
-            return { email };
-          }),
+          attendees: attendees.map((email: string) => ({ email })),
         },
       }),
     )

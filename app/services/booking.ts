@@ -32,6 +32,7 @@ const PAGE = {
 export type SaunaBooking = {
   end?: DateTime;
   start?: DateTime;
+  timeZone?: string;
   error?: boolean;
   status: string;
 };
@@ -144,7 +145,8 @@ const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): P
     )} on ${getBookingSlotDate().toFormat(`ccc d'.' LLLL`)}. 👌👌`,
     start: getBookingSlotDate().set({ hour: startHour }),
     end: getBookingSlotDate().set({ hour: startHour + 1 }),
-  };
+    timeZone: Configuration.booking.timezone,
+  } as SaunaBooking;
 };
 
 /**

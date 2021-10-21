@@ -8,6 +8,8 @@ Books sauna slots for you automatically based on your preferences when they are 
 
 - Book sauna slots (4 weeks inito future) automatically with **puppeteer** runnning in AWS Lambda
 - Daily [configurable sauna preferences](./app/configuration/sauna-preference.ts) for booking.
+- Status messages to **Telegram** 📱
+- Calendar invites to google calendar 📅
 - Serverless framework + Cloudformation for infra.
 - _**Sentry.io**_ on issue lookout!
 - ~~VS Code dev container for local dev setup 🐳 🐳~~
