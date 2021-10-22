@@ -4,13 +4,13 @@ import { DateTime } from 'luxon';
 import { Configuration } from '../configuration';
 
 const calendar = google.calendar('v3');
-const { refreshToken, attendees } = Configuration.google;
+const { refreshToken, attendees, clientId, clientSecret } = Configuration.google;
 const { booking } = Configuration;
 
 /**
  * Create a new OAuth2 client with the configured keys.
  */
-const oauth2Client = new google.auth.OAuth2(Configuration.google.clientId, Configuration.google.clientSecret);
+const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
 
 // Set the refresh token
 oauth2Client.setCredentials({
@@ -31,8 +31,8 @@ type InviteParams = {
  *
  * @param {InviteParams} params
  */
-export const createInvite = ({ end, start, timeZone }: InviteParams) => {
-  oauth2Client
+export const createInvite = async ({ end, start, timeZone }: InviteParams) => {
+  await oauth2Client
     .getRequestHeaders()
     .then(() =>
       calendar.events.insert({
@@ -50,7 +50,9 @@ export const createInvite = ({ end, start, timeZone }: InviteParams) => {
             useDefault: false,
             overrides: [{ method: 'popup', minutes: 30 }],
           },
+          description: booking.site,
           source: {
+            title: booking.site,
             url: booking.site,
           },
           start: {
@@ -61,5 +63,8 @@ export const createInvite = ({ end, start, timeZone }: InviteParams) => {
         },
       }),
     )
+    .then(({ statusText, data }) => {
+      console.log(`${statusText} added calendar event with data: ${JSON.stringify(data)}`);
+    })
     .catch((err) => console.error(err));
 };

@@ -18,7 +18,7 @@ const PAGE = {
   CONFIRM_BUTTON: '.ok',
   NEW_BOOKING_BUTTON: '.addbooking',
   ACCEPT_COOKIES_BUTTON: 'button[data-allowall]',
-  SLOTS_XP: '//div[@class = "slot"][2]',
+  SLOTS_XP: '//div[@class = "slot"]',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
   MY_BOOKED_SLOT_XP: '//div[contains(@class, "slot")][@data-bookedby="self"]',
   NEXT_WEEK_BUTTON: '.next.browse',
@@ -146,6 +146,7 @@ const bookNextSlot = async (page: Page, preference: SaunaDay, double = false): P
     start: getBookingSlotDate().set({ hour: startHour }),
     end: getBookingSlotDate().set({ hour: startHour + 1 }),
     timeZone: Configuration.booking.timezone,
+    error: false,
   } as SaunaBooking;
 };
 

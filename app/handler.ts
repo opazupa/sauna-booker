@@ -35,9 +35,9 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, con
   try {
     const bookings = await bookSaunaSlots(page);
     for (const booking of bookings) {
-      console.log(booking.status);
+      console.log(booking);
       await sendNotification(booking.status);
-      if (!booking.error) createInvite({ ...booking });
+      if (!booking.error) await createInvite({ ...booking });
     }
     await browser.close();
   } catch (err) {
