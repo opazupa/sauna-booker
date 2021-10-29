@@ -1,10 +1,11 @@
 import { Handler } from 'aws-lambda';
 
+import { hasSaunaPreference } from './configuration';
 import { bookSaunaSlots } from './services/booking';
 import { createInvite } from './services/calendar';
 import { saveErrorScreenShot } from './services/s3';
 import { sendNotification } from './services/telegram';
-import { bookingsOpened, getBookingZoneTime, hasSaunaPreference, setup, wrapHandler } from './utils';
+import { bookingsOpened, getBookingSlotDate, getBookingZoneTime, setup, wrapHandler } from './utils';
 
 /**
  * Book sauna event parameters
@@ -18,6 +19,9 @@ type BookSaunaParams = {
  */
 export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, context) => {
   const today = getBookingZoneTime();
+  const bookingDate = getBookingSlotDate();
+  const saunaDayPreference = hasSaunaPreference(bookingDate);
+
   // Return if the trigger is not on the booking opening hour
   if (!(event.ignoreOpeningHour || bookingsOpened())) {
     console.log(`No opening hour, no trigger. The time in booking timezone is ${today.toString()} 🤔`);
@@ -25,15 +29,15 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, con
   }
 
   // Check if the day is configured
-  if (!hasSaunaPreference()) {
-    console.log(`No sauna preferences configured for ${today.weekdayShort}`);
+  if (!saunaDayPreference) {
+    console.log(`No sauna preferences configured for ${bookingDate.weekdayShort} on week ${bookingDate.weekNumber}`);
     return;
   }
+  console.log(`Found sauna preference for ${bookingDate.weekdayShort} : ${JSON.stringify(saunaDayPreference)}`);
 
   const { browser, page } = await setup();
-
   try {
-    const bookings = await bookSaunaSlots(page);
+    const bookings = await bookSaunaSlots({ page, bookingDate, saunaDayPreference });
     for (const booking of bookings) {
       console.log(booking);
       await sendNotification(booking.status);

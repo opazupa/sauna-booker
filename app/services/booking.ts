@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { ElementHandle, Page } from 'puppeteer-core';
 
 import { Configuration, SaunaDay } from '../configuration';
-import { BOOKING_WEEKS_AHEAD, getBookingSlotDate, hasSaunaPreference, repeatClick, shortPause } from '../utils';
+import { BOOKING_WEEKS_AHEAD, getBookingSlotDate, repeatClick, shortPause } from '../utils';
 
 // Site home URL
 const HOME_URL = Configuration.booking.site;
@@ -38,17 +38,25 @@ export type SaunaBooking = {
 };
 
 /**
+ * Sauna slot booking params
+ */
+type SaunaSlotBookingParams = {
+  page: Page;
+  bookingDate: DateTime;
+  saunaDayPreference: SaunaDay;
+};
+
+/**
  * Book sauna slots
  *
- * @param {Page} page
  * @returns
  */
-export const bookSaunaSlots = async (page: Page) => {
-  // Go to home site
+export const bookSaunaSlots = async (params: SaunaSlotBookingParams) => {
+  const { page } = params;
   await page.goto(HOME_URL);
   await login(page);
   await navigateToBookings(page);
-  return await bookFreeSlots(page);
+  return await bookFreeSlots(params);
 };
 
 /**
@@ -57,11 +65,11 @@ export const bookSaunaSlots = async (page: Page) => {
  * @param {Page} page
  * @returns {Promise<SaunaBooking[]>}
  */
-const bookFreeSlots = async (page: Page): Promise<SaunaBooking[]> => {
-  const bookingDate = getBookingSlotDate();
-  const saunaDayPreference = hasSaunaPreference();
-  console.log(`Found sauna preferences for  ${bookingDate.weekdayShort} : ${JSON.stringify(saunaDayPreference)}`);
-
+const bookFreeSlots = async ({
+  page,
+  bookingDate,
+  saunaDayPreference,
+}: SaunaSlotBookingParams): Promise<SaunaBooking[]> => {
   // Browse 4 weeks ahead (calendar is bookable 4 weeks from now)
   await repeatClick(page, PAGE.NEXT_WEEK_BUTTON, BOOKING_WEEKS_AHEAD);
 

@@ -1,10 +1,13 @@
 import * as dotenv from 'dotenv';
+import { DateTime } from 'luxon';
 
-import { ConfiguredSaunaPreferences, SaunaPreferences } from './sauna-preference';
+import { DefaultSaunaPreference, WeeklySaunaPreferences } from './preference';
+import { SaunaDay, SaunaPreference, WeeklyPreference } from './types';
 
-export { SaunaDay } from './sauna-preference';
+export { SaunaDay } from './types';
 
 const DEVELOPMENT = 'dev';
+const WEEKLY_BOOKING_LIMIT = 2;
 
 /**
  * Env configuration interface
@@ -25,7 +28,8 @@ export interface IConfiguration {
     userName: string;
     password: string;
     timezone: string;
-    saunaDayPreferences: SaunaPreferences;
+    defaultPreference: SaunaPreference;
+    weeklyPreferences: WeeklyPreference;
   };
   google: {
     clientId: string;
@@ -88,7 +92,8 @@ export const Configuration: IConfiguration = {
     userName: BOOKING_USERNAME,
     password: BOOKING_PASSWORD,
     timezone: BOOKING_TIMEZONE,
-    saunaDayPreferences: ConfiguredSaunaPreferences,
+    defaultPreference: DefaultSaunaPreference,
+    weeklyPreferences: WeeklySaunaPreferences,
   },
   google: {
     clientId: GOOGLE_CALENDAR_CLIENT_ID,
@@ -105,4 +110,23 @@ export const Configuration: IConfiguration = {
     chatId: TELEGRAM_CHAT_ID,
   },
   chromeExecPath: CHROME_EXEC_PATH,
+};
+
+/**
+ * Get sauna preference for the booking day
+ *
+ * @returns
+ */
+export const hasSaunaPreference = (date: DateTime): SaunaDay | null => {
+  const { defaultPreference, weeklyPreferences } = Configuration.booking;
+
+  // Take special preference if found for the week
+  const preference = weeklyPreferences[date.weekNumber] || defaultPreference;
+
+  // Validate sauna configuration for debugging
+  const configuredBookingCount = Object.values(preference).reduce((a, b) => (b.double ? a + 2 : ++a), 0);
+  if (configuredBookingCount > WEEKLY_BOOKING_LIMIT) {
+    console.warn(`Weekly booking limit ${WEEKLY_BOOKING_LIMIT} exceeded with ${configuredBookingCount}.`);
+  }
+  return preference[date.weekdayShort];
 };
