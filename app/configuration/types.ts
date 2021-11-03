@@ -1,7 +1,7 @@
 // Weekday
 export type Weekday = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 // Sauna time preference
-export type TimePreference = 'FIRST' | 'MIDDLE' | 'LAST';
+export type TimePreference = 'FIRST' | 'MIDDLE' | 'SECOND_LAST' | 'LAST';
 
 /**
  * Sauna day

@@ -6,7 +6,7 @@ import { SaunaPreference, WeeklyPreference } from './types';
 export const DefaultSaunaPreference: SaunaPreference = {
   // Only two should be enabled due sauna booking limit per week 2
   Thu: { time: 'LAST' },
-  Sun: { time: 'LAST' },
+  Sun: { time: 'SECOND_LAST' },
 };
 
 /**
@@ -14,11 +14,11 @@ export const DefaultSaunaPreference: SaunaPreference = {
  * Will override {DefaultSaunaPreference}
  */
 export const WeeklySaunaPreferences: WeeklyPreference = {
-  47: { Sun: { time: 'LAST' } },
+  47: { Sun: { time: 'SECOND_LAST' } },
   48: { Fri: { double: true, time: 'LAST' } },
-  51: { Sun: { time: 'LAST' } },
+  51: { Sun: { time: 'SECOND_LAST' } },
   52: { Thu: { time: 'MIDDLE' } },
   1: { Sat: { time: 'MIDDLE' } },
   2: { Thu: { time: 'LAST' }, Sat: { time: 'MIDDLE' } },
-  3: { Sat: { time: 'MIDDLE' }, Sun: { time: 'LAST' } },
+  3: { Sat: { time: 'MIDDLE' }, Sun: { time: 'SECOND_LAST' } },
 };

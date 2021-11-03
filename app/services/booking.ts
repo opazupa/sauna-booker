@@ -211,11 +211,14 @@ const navigateToBookings = async (page: Page) => {
  * @returns {ElementHandle<Element>}
  */
 const selectPreferredSaunaSlot = (slots: ElementHandle<Element>[], preference: SaunaDay): ElementHandle<Element> => {
+  const multiple = slots.length > 1;
   switch (preference.time) {
     case 'FIRST':
       return slots[0];
     case 'MIDDLE':
       return slots[Math.round((slots.length - 1) / 2)];
+    case 'SECOND_LAST':
+      return multiple ? slots[slots.length - 2] : slots[slots.length - 1];
     case 'LAST':
       return slots[slots.length - 1];
     default:
