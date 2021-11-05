@@ -15,7 +15,7 @@ export const DefaultSaunaPreference: SaunaPreference = {
  */
 export const WeeklySaunaPreferences: WeeklyPreference = {
   47: { Sun: { time: 'SECOND_LAST' } },
-  48: { Fri: { double: true, time: 'LAST' } },
+  48: { Fri: { time: 'LAST' }, Sun: { time: 'SECOND_LAST' } },
   51: { Sun: { time: 'SECOND_LAST' } },
   52: { Thu: { time: 'MIDDLE' } },
   1: { Sat: { time: 'MIDDLE' } },
