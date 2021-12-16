@@ -1,17 +1,12 @@
 import { Handler } from 'aws-lambda';
 
 import { hasSaunaPreference } from './configuration';
+import { Weekday } from './configuration/types';
 import { bookSaunaSlots, getSaunaUsage } from './services/booking';
 import { createInvite } from './services/calendar';
 import { saveErrorScreenShot, saveSaunaLog } from './services/s3';
 import { sendNotification } from './services/telegram';
-import {
-  bookingsOpened,
-  getBookingSlotDate,
-  getBookingZoneTime,
-  setup,
-  wrapHandler,
-} from './utils';
+import { bookingsOpened, getBookingSlotDate, getBookingZoneTime, setup, wrapHandler } from './utils';
 
 /**
  * Book sauna event parameters
@@ -30,24 +25,16 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, con
 
   // Return if the trigger is not on the booking opening hour
   if (!(event.ignoreOpeningHour || bookingsOpened())) {
-    console.log(
-      `No opening hour, no trigger. The time in booking timezone is ${today.toString()} 🤔`,
-    );
+    console.log(`No opening hour, no trigger. The time in booking timezone is ${today.toString()} 🤔`);
     return;
   }
 
   // Check if the day is configured
   if (!saunaDayPreference) {
-    console.log(
-      `No sauna preferences configured for ${bookingDate.weekdayShort} on week ${bookingDate.weekNumber}`,
-    );
+    console.log(`No sauna preferences configured for ${bookingDate.weekdayShort} on week ${bookingDate.weekNumber}`);
     return;
   }
-  console.log(
-    `Found sauna preference for ${bookingDate.weekdayShort} : ${JSON.stringify(
-      saunaDayPreference,
-    )}`,
-  );
+  console.log(`Found sauna preference for ${bookingDate.weekdayShort} : ${JSON.stringify(saunaDayPreference)}`);
 
   const { browser, page } = await setup();
   try {
@@ -61,10 +48,7 @@ export const bookSauna: Handler<BookSaunaParams> = wrapHandler(async (event, con
   } catch (err) {
     await page
       .screenshot({ fullPage: true })
-      .then(
-        async (screenShot) =>
-          await saveErrorScreenShot(<Buffer>screenShot, context.awsRequestId, today),
-      )
+      .then(async (screenShot) => await saveErrorScreenShot(<Buffer>screenShot, context.awsRequestId, today))
       .catch((err) => console.error(err));
     await browser.close();
     throw err;
@@ -80,7 +64,7 @@ export const logSaunaUsage: Handler = wrapHandler(async () => {
 
   const { browser, page } = await setup();
   try {
-    const stats = await getSaunaUsage(page);
+    const stats = await getSaunaUsage(page, <Weekday>today.weekdayShort);
     await saveSaunaLog(stats, today);
     await browser.close();
   } catch (err) {

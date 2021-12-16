@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { ElementHandle, Page } from 'puppeteer-core';
 
 import { Configuration, SaunaDay } from '../configuration';
+import { Weekday } from '../configuration/types';
 import { BOOKING_WEEKS_AHEAD, getBookingSlotDate, repeatClick, shortPause } from '../utils';
 
 // Site home URL
@@ -65,30 +66,35 @@ export const bookSaunaSlots = async (params: SaunaSlotBookingParams) => {
  *
  * @returns
  */
-export const getSaunaUsage = async (page: Page) => {
+export const getSaunaUsage = async (page: Page, weekDay: Weekday) => {
   await page.goto(HOME_URL);
   await login(page);
   await navigateToBookings(page);
-  return await getSlotStatuses(page);
+  return await getSlotStatuses(page, weekDay);
 };
 
 /**
  * Get sauna slot statuses
  *
  * @param {Page} page
+ * @param {Weekday} weekDay
  * @returns
  */
-const getSlotStatuses = async (page: Page) => {
+const getSlotStatuses = async (page: Page, weekDay: Weekday) => {
+  // Counts are not reliable on non sauna days
+  const isSaunaDay = (['Thu', 'Fri', 'Sat', 'Sun'] as Weekday[]).includes(weekDay);
+  if (!isSaunaDay) return { all: 0, free: 0 };
+
   await page
     .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
     .then((text) => console.log(`${text}is selected from the calendar get statuses.`));
   await page.waitForTimeout(5000);
 
-  const allSlots = await page.$$(PAGE.SLOT);
-  const freeSlots = await page.$$(PAGE.FREE_SLOT);
-  console.log(`Sauna booking statuses: ${freeSlots.length}/${allSlots.length}`);
+  const allSlots = (await page.$$(PAGE.SLOT)).length;
+  const freeSlots = (await page.$$(PAGE.FREE_SLOT)).length;
+  console.log(`Sauna booking statuses: ${freeSlots}/${allSlots}`);
 
-  return { all: allSlots.length, free: freeSlots.length };
+  return { all: allSlots, free: freeSlots };
 };
 
 /**
