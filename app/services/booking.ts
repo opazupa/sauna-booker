@@ -19,6 +19,7 @@ const PAGE = {
   NEW_BOOKING_BUTTON: '.addbooking',
   ACCEPT_COOKIES_BUTTON: 'button[data-allowall]',
   SLOTS_XP: '//div[@class = "slot"]',
+  SLOT: 'div.slot',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
   MY_BOOKED_SLOT_XP: '//div[contains(@class, "slot")][@data-bookedby="self"]',
   NEXT_WEEK_BUTTON: '.next.browse',
@@ -57,6 +58,37 @@ export const bookSaunaSlots = async (params: SaunaSlotBookingParams) => {
   await login(page);
   await navigateToBookings(page);
   return await bookFreeSlots(params);
+};
+
+/**
+ * Get sauna usage for today
+ *
+ * @returns
+ */
+export const getSaunaUsage = async (page: Page) => {
+  await page.goto(HOME_URL);
+  await login(page);
+  await navigateToBookings(page);
+  return await getSlotStatuses(page);
+};
+
+/**
+ * Get sauna slot statuses
+ *
+ * @param {Page} page
+ * @returns
+ */
+const getSlotStatuses = async (page: Page) => {
+  await page
+    .$eval(PAGE.SELECTED_DATE, (el) => el.textContent)
+    .then((text) => console.log(`${text}is selected from the calendar get statuses.`));
+  await page.waitForTimeout(5000);
+
+  const allSlots = await page.$$(PAGE.SLOT);
+  const freeSlots = await page.$$(PAGE.FREE_SLOT);
+  console.log(`Sauna booking statuses: ${freeSlots.length}/${allSlots.length}`);
+
+  return { all: allSlots.length, free: freeSlots.length };
 };
 
 /**

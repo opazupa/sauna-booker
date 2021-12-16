@@ -5,6 +5,8 @@ import { Configuration } from '../configuration';
 
 const { aws, isDev } = Configuration;
 
+const LOG_FILE_NAME = 'sauna-log.csv';
+
 // Create S3 service object
 const s3 = new S3({
   region: aws.region,
@@ -36,4 +38,35 @@ export const saveErrorScreenShot = async (screenShot: Buffer, requestId: string,
     .putObject(params)
     .promise()
     .then(() => console.log(`Uploaded error screenshot ${fileName} to ${aws.bucket} 🚀`));
+};
+
+/**
+ * Save sauna log
+ *
+ * @param {{ all: number; free: number }} stats
+ * @param {DateTime} dateInfo
+ * @returns
+ */
+export const saveSaunaLog = async (stats: { all: number; free: number }, dateInfo: DateTime) => {
+  const newEntry = `${dateInfo.toFormat('yyyy/MM/dd')};${stats.all};${stats.free}`;
+  // Get the current
+  const data = await s3
+    .getObject({
+      Bucket: aws.bucket,
+      Key: LOG_FILE_NAME,
+    })
+    .promise()
+    .then((res) => res.Body.toString());
+
+  if (!data) return;
+
+  // Add the new entry and save
+  await s3
+    .putObject({
+      Bucket: aws.bucket,
+      Key: LOG_FILE_NAME,
+      Body: data + '\n' + newEntry,
+    })
+    .promise()
+    .then(() => console.log(`Updated ${LOG_FILE_NAME} with entry ${newEntry} to ${aws.bucket} 🚀`));
 };

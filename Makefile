@@ -17,5 +17,8 @@ stop-services:			## Stop local dev services
 book:  				## Book sauna
 	npm run invoke -- book-sauna --data '{"ignoreOpeningHour":true}'
 
+log:  				## Log sauna usage
+	npm run invoke -- log-sauna-usage
+
 refresh-token:  		## Get new refresh token
 	npm run generate-token
