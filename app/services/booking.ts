@@ -22,6 +22,7 @@ const PAGE = {
   SLOTS_XP: '//div[@class = "slot"]',
   SLOT: 'div.slot',
   FREE_SLOT: 'div.slot[data-bookedby=none]',
+  NOT_BOOKED_SLOT: 'div.slot[data-bookedby=notbookable]',
   MY_BOOKED_SLOT_XP: '//div[contains(@class, "slot")][@data-bookedby="self"]',
   NEXT_WEEK_BUTTON: '.next.browse',
   SELECTED_DATE: '.activedate',
@@ -91,10 +92,10 @@ const getSlotStatuses = async (page: Page, weekDay: Weekday) => {
   await page.waitForTimeout(5000);
 
   const allSlots = (await page.$$(PAGE.SLOT)).length;
-  const freeSlots = (await page.$$(PAGE.FREE_SLOT)).length;
-  console.log(`Sauna booking statuses: ${freeSlots}/${allSlots}`);
+  const notBookedSlots = (await page.$$(PAGE.NOT_BOOKED_SLOT)).length;
+  console.log(`Sauna booking statuses: ${notBookedSlots}/${allSlots}`);
 
-  return { all: allSlots, free: freeSlots };
+  return { all: allSlots, free: notBookedSlots };
 };
 
 /**
