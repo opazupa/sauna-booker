@@ -62,9 +62,8 @@ functions:
         - arn:aws:lambda:${env:AWS_S3_REGION}:764866452798:layer:chrome-aws-lambda:22
     events:
       - schedule:
-          # Helsinki timezone is UTC+2 | UTC+3. 
-          # This UTC trigger will run 21.00 | 22.00 in Helsinki every day
-          rate: cron(0 20 ? * MON-SUN *)  
+          # 22.00 at finnish summer time
+          rate: cron(0 19 ? * MON-SUN *)  
           enabled: true
 
 
